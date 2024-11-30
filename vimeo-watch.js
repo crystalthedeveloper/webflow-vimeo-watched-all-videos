@@ -27,16 +27,24 @@ function disableQuizButton() {
     }
 }
 
-// Enable the quiz button
-function enableQuizButton() {
-    const button = document.querySelector(".quiz-button");
-    if (button) {
-        button.classList.remove("disabled");
-        button.style.pointerEvents = "auto";
-        button.style.opacity = "1";
-        console.log("Enabled the quiz button.");
+// Enable the quiz button only if all videos are watched
+function enableQuizButtonIfAllWatched() {
+    const totalWatched = isGuest()
+        ? Object.keys(guestVideoWatched).filter((id) => guestVideoWatched[id]).length
+        : Object.keys(userVideoWatched).filter((id) => userVideoWatched[id]).length;
+
+    if (totalWatched === totalVideos.size && totalVideos.size > 0) {
+        const button = document.querySelector(".quiz-button");
+        if (button) {
+            button.classList.remove("disabled");
+            button.style.pointerEvents = "auto";
+            button.style.opacity = "1";
+            console.log("Enabled the quiz button.");
+        } else {
+            console.warn("Quiz button not found on the page.");
+        }
     } else {
-        console.warn("Quiz button not found on the page.");
+        console.log(`Not all videos watched. Total: ${totalVideos.size}, Watched: ${totalWatched}`);
     }
 }
 
@@ -66,42 +74,10 @@ function unhideVideoComplete(videoId, chapter) {
         } else {
             console.warn(`No logged-in user completion elements found for Chapter ${chapter}.`);
         }
-
-        // Attach click handlers for watched links
-        attachWatchedLinkHandlers();
     }
-}
 
-// Attach click handlers for watched links dynamically
-function attachWatchedLinkHandlers() {
-    if (isGuest()) return; // Guests do not have watched links
-
-    // Define mappings between watched links and target tabs
-    const linksToTabs = {
-        ".watched_link1": "[data-w-tab='Tab 1']", // .watched_link1 navigates to Tab 1
-        ".watched_link2": "[data-w-tab='Tab 2']", // .watched_link2 navigates to Tab 2
-    };
-
-    Object.keys(linksToTabs).forEach((linkSelector) => {
-        const targetTabSelector = linksToTabs[linkSelector];
-        const watchedLink = document.querySelector(linkSelector);
-        const targetTab = document.querySelector(targetTabSelector);
-
-        if (!watchedLink || !targetTab) {
-            console.warn(`Missing ${linkSelector} or ${targetTabSelector}.`);
-            return;
-        }
-
-        // Remove existing click handler to avoid duplication
-        watchedLink.removeEventListener("click", handleWatchedLinkClick);
-        watchedLink.addEventListener("click", handleWatchedLinkClick);
-
-        function handleWatchedLinkClick(event) {
-            event.preventDefault(); // Prevent default behavior
-            targetTab.click(); // Simulate clicking the tab
-            console.log(`Navigated to ${targetTabSelector} via ${linkSelector}.`);
-        }
-    });
+    // Check if all videos are watched to enable the quiz button
+    enableQuizButtonIfAllWatched();
 }
 
 // Initialize Vimeo players dynamically
@@ -118,8 +94,23 @@ function initializeVimeoPlayers() {
 
         player.on("ended", () => {
             console.log(`Video ${videoId} ended.`);
+
+            // Mark video as watched
+            if (isGuest()) {
+                guestVideoWatched[videoId] = true;
+                localStorage.setItem(
+                    `guestVideoWatched_${pageKey}`,
+                    JSON.stringify(guestVideoWatched)
+                );
+            } else {
+                userVideoWatched[videoId] = true;
+                localStorage.setItem(
+                    `userVideoWatched_${pageKey}`,
+                    JSON.stringify(userVideoWatched)
+                );
+            }
+
             unhideVideoComplete(videoId, chapter);
-            enableQuizButton();
         });
 
         player.on("loaded", () => {
@@ -133,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     disableQuizButton(); // Disable the quiz button initially
     loadScript("https://player.vimeo.com/api/player.js", () => {
         initializeVimeoPlayers();
-        attachWatchedLinkHandlers(); // Attach handlers for watched links
     });
 });
 
