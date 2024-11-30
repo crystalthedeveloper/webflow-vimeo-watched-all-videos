@@ -95,6 +95,29 @@ function loadScript(src, callback) {
 
 // Initialize on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
+    // Disable the quiz button initially
     disableQuizButton();
-    loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
+
+    // Check user login status based on a specific Webflow class or element
+    const isLoggedIn = document.body.classList.contains("logged-in"); // Adjust this class name as per your Webflow setup
+
+    // Handle visibility of video embeds based on login state
+    document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
+        if (isLoggedIn && iframe.classList.contains("guest-video")) {
+            // Hide guest video for logged-in users
+            iframe.style.display = "none";
+        } else if (!isLoggedIn && iframe.classList.contains("user-video")) {
+            // Hide user video for guest users
+            iframe.style.display = "none";
+        } else {
+            // Show the appropriate video
+            iframe.style.display = "block";
+        }
+    });
+
+    // Dynamically load the Vimeo API script and initialize players
+    loadScript("https://player.vimeo.com/api/player.js", () => {
+        console.log("Vimeo API script loaded.");
+        initializeVimeoPlayers();
+    });
 });
