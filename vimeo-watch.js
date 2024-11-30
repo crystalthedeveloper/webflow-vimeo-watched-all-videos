@@ -40,26 +40,26 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Show user videos and hide guest videos
+// Show user videos and hide guest videos based on login state
 function toggleVideoVisibility(isLoggedIn) {
-    const guestVideos = document.querySelectorAll(".guest_video");
-    const userVideos = document.querySelectorAll(".user_video");
+    const guestVideoWrap = document.querySelector(".guest_video-wrap");
+    const userVideoWrap = document.querySelector(".user_video-wrap");
 
     if (isLoggedIn) {
-        guestVideos.forEach((video) => video.classList.add("hidden"));
-        userVideos.forEach((video) => video.classList.remove("hidden"));
+        if (guestVideoWrap) guestVideoWrap.style.display = "none";
+        if (userVideoWrap) userVideoWrap.style.display = "block";
     } else {
-        guestVideos.forEach((video) => video.classList.remove("hidden"));
-        userVideos.forEach((video) => video.classList.add("hidden"));
+        if (guestVideoWrap) guestVideoWrap.style.display = "block";
+        if (userVideoWrap) userVideoWrap.style.display = "none";
     }
 }
 
 // Unhide completion elements and attach click handlers
 function unhideVideoComplete(videoId, chapter) {
     if (isGuest()) {
-        $(`.guest_complete_${chapter}`).removeClass("hidden");
+        document.querySelector(`.guest_complete_${chapter}`)?.classList.remove("hidden");
     } else {
-        $(`.video_complete_${chapter}`).removeClass("hidden");
+        document.querySelector(`.video_complete_${chapter}`)?.classList.remove("hidden");
 
         // Attach click handlers to watched links
         const watchedLinks = {
@@ -69,7 +69,13 @@ function unhideVideoComplete(videoId, chapter) {
 
         const watchedLink = watchedLinks[chapter];
         if (watchedLink) {
-            $(watchedLink.link).off("click").on("click", () => $(watchedLink.tab).click());
+            const linkElement = document.querySelector(watchedLink.link);
+            if (linkElement) {
+                linkElement.addEventListener("click", () => {
+                    const tabElement = document.querySelector(watchedLink.tab);
+                    if (tabElement) tabElement.click();
+                });
+            }
         }
     }
 
@@ -113,8 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
 
     // Toggle video visibility on user login state
-    const isLoggedIn = !isGuest();
-    toggleVideoVisibility(isLoggedIn);
+    toggleVideoVisibility(!isGuest());
 
     // Simulate user login event for testing (remove in production)
     setTimeout(() => {
