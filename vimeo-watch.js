@@ -48,21 +48,17 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Attach handler for .watched_link1
+// Attach handler for `.watched_link1`
 function attachWatchedLink1Handler() {
-    const linkSelector = ".watched_link1";
-    const targetTabSelector = "[data-w-tab='Tab 1']";
-    attachWatchedLinkHandler(linkSelector, targetTabSelector);
+    attachWatchedLinkHandler(".watched_link1", "[data-w-tab='Tab 1']");
 }
 
-// Attach handler for .watched_link2
+// Attach handler for `.watched_link2`
 function attachWatchedLink2Handler() {
-    const linkSelector = ".watched_link2";
-    const targetTabSelector = "[data-w-tab='Tab 2']";
-    attachWatchedLinkHandler(linkSelector, targetTabSelector);
+    attachWatchedLinkHandler(".watched_link2", "[data-w-tab='Tab 2']");
 }
 
-// Generic handler for attaching watched links
+// Generic function to attach watched link handlers
 function attachWatchedLinkHandler(linkSelector, targetTabSelector) {
     const watchedLink = document.querySelector(linkSelector);
     const targetTabLink = document.querySelector(targetTabSelector);
@@ -85,7 +81,7 @@ function attachWatchedLinkHandler(linkSelector, targetTabSelector) {
     });
 }
 
-// Activate tab with fallback
+// Activate a tab with a fallback for manual activation
 function activateTab(targetTabLink, targetTabSelector) {
     try {
         console.log(`Simulating click on ${targetTabSelector}...`);
