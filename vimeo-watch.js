@@ -19,7 +19,6 @@ function disableAllQuizButtons() {
     document.querySelectorAll(".quiz-button").forEach((button) => {
         button.classList.add("disabled");
         button.style.pointerEvents = "none";
-        button.style.opacity = "0.5";
         console.log("Disabled all quiz buttons.");
     });
 }
@@ -88,12 +87,16 @@ function unhideVideoComplete(videoId, chapter, isGuestVideo) {
 // Attach click handlers for watched links to navigate to their respective tabs
 function attachWatchedLinkClickHandler(chapter) {
     const watchedLinkSelector = `.watched_link${chapter}`;
-    const tabSelector = `[data-w-tab='Tab ${chapter}']`; // Use the correct tab ID based on chapter
+    const tabSelector = `[data-w-tab='Tab ${chapter}']`;
 
     const watchedLink = document.querySelector(watchedLinkSelector);
     const tab = document.querySelector(tabSelector);
 
     if (watchedLink && tab) {
+        // Remove existing click event to prevent duplication
+        watchedLink.removeEventListener("click", () => {});
+        
+        // Add new click event
         watchedLink.addEventListener("click", () => {
             tab.click();
             console.log(`Navigated to Tab ${chapter} via ${watchedLinkSelector}.`);
