@@ -48,123 +48,35 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Attach handler for `.watched_link1`
-function attachWatchedLink1Handler() {
-    attachWatchedLinkHandler(".watched_link1", "[data-w-tab='Tab 1']");
-}
-
-// Attach handler for `.watched_link2`
-function attachWatchedLink2Handler() {
-    attachWatchedLinkHandler(".watched_link2", "[data-w-tab='Tab 2']");
-}
-
-// Generic function to attach watched link handlers
-function attachWatchedLinkHandler(linkSelector, targetTabSelector) {
-    const watchedLink = document.querySelector(linkSelector);
-    const targetTabLink = document.querySelector(targetTabSelector);
-
-    console.log(`Checking for ${linkSelector} and ${targetTabSelector}...`);
-    if (!watchedLink) {
-        console.warn(`Watched link ${linkSelector} not found.`);
-        return;
-    }
-    if (!targetTabLink) {
-        console.warn(`Target tab ${targetTabSelector} not found.`);
-        return;
-    }
-
-    console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
-    watchedLink.addEventListener("click", (event) => {
-        event.preventDefault();
-        console.log(`Click handler fired for ${linkSelector}`);
-        activateTab(targetTabLink, targetTabSelector);
-    });
-}
-
-// Activate a tab with a fallback for manual activation
-function activateTab(targetTabLink, targetTabSelector) {
-    try {
-        console.log(`Simulating click on ${targetTabSelector}...`);
-        // Explicitly simulate click for Webflow's tab system
-        const tabTrigger = targetTabLink.closest(".w-tab-link");
-        if (tabTrigger) {
-            tabTrigger.click(); // Use Webflow's built-in click event for tabs
-            console.log(`Simulated click on ${targetTabSelector}.`);
-            return;
-        }
-
-        // Fallback if no tab trigger is found
-        console.warn("Tab trigger not found. Falling back to manual activation.");
-
-        const tabsContainer = targetTabLink.closest(".w-tabs");
-        if (tabsContainer) {
-            console.log(`Manually activating tab ${targetTabSelector}...`);
-
-            const allTabs = tabsContainer.querySelectorAll("[data-w-tab]");
-            const allTabLinks = tabsContainer.querySelectorAll(".w-tab-link");
-
-            allTabs.forEach((tab) => {
-                tab.classList.remove("w--tab-active");
-                tab.setAttribute("aria-selected", "false");
-            });
-
-            allTabLinks.forEach((link) => {
-                link.classList.remove("w--current");
-            });
-
-            targetTabLink.classList.add("w--current");
-            targetTabLink.setAttribute("aria-selected", "true");
-
-            const targetTabContent = tabsContainer.querySelector(
-                `[aria-controls="${targetTabLink.id}"]`
-            );
-            if (targetTabContent) {
-                targetTabContent.classList.add("w--tab-active");
-            } else {
-                console.warn(
-                    `No tab content found for ${targetTabSelector} with aria-controls="${targetTabLink.id}".`
-                );
-            }
-
-            console.log(`Activated tab link for ${targetTabSelector}.`);
-        } else {
-            console.warn(`Could not find tabs container for ${targetTabSelector}.`);
-        }
-    } catch (error) {
-        console.error(`Error activating tab ${targetTabSelector}:`, error);
-    }
-}
-
-function attachWatchedLinkHandlers() {
-    console.log("Attaching watched link handlers...");
-    attachWatchedLink1Handler();
-    attachWatchedLink2Handler();
-}
-
-// Unhide completion elements dynamically
+// Unhide completion elements dynamically and attach appropriate handlers
 function unhideVideoComplete(videoId, chapter) {
     console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
 
     if (isGuest()) {
-        const guestCompletionClass = `.guest_complete_${chapter}`;
-        const guestCompletionElements = document.querySelectorAll(guestCompletionClass);
-
-        if (guestCompletionElements.length > 0) {
-            guestCompletionElements.forEach((element) => element.classList.remove("hidden"));
-            console.log(`Unhid guest completion elements for Chapter ${chapter}.`);
-        } else {
-            console.warn(`No guest completion elements found for Chapter ${chapter}.`);
+        switch (chapter) {
+            case 1:
+                $(".guest_complete_1").removeClass("hidden");
+                break;
+            case 2:
+                $(".guest_complete_2").removeClass("hidden");
+                break;
+            case 3:
+                $(".guest_complete_3").removeClass("hidden");
+                break;
         }
     } else {
-        const userCompletionClass = `.video_complete_${chapter}`;
-        const userCompletionElements = document.querySelectorAll(userCompletionClass);
-
-        if (userCompletionElements.length > 0) {
-            userCompletionElements.forEach((element) => element.classList.remove("hidden"));
-            console.log(`Unhid logged-in user completion elements for Chapter ${chapter}.`);
-            attachWatchedLinkHandlers();
-        } else {
-            console.warn(`No logged-in user completion elements found for Chapter ${chapter}.`);
+        switch (chapter) {
+            case 1:
+                $(".video_complete_1").removeClass("hidden");
+                $(".watched_link1").off("click").on("click", () => $('[data-w-tab="Tab 1"]').click());
+                break;
+            case 2:
+                $(".video_complete_2").removeClass("hidden");
+                $(".watched_link2").off("click").on("click", () => $('[data-w-tab="Tab 2"]').click());
+                break;
+            case 3:
+                $(".video_complete_3").removeClass("hidden");
+                break;
         }
     }
 
@@ -216,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Load Vimeo Player API dynamically
 function loadScript(src, callback) {
     const script = document.createElement("script");
     script.src = src;
