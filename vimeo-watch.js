@@ -14,6 +14,27 @@ function detectLoginState() {
     return document.querySelector(".uservideo") !== null;
 }
 
+// Disable all quiz buttons
+function disableAllQuizButtons() {
+    document.querySelectorAll(".quiz-button").forEach((button) => {
+        button.classList.add("disabled");
+        button.style.pointerEvents = "none";
+        button.style.opacity = "0.5";
+        console.log("Disabled all quiz buttons.");
+    });
+}
+
+// Enable specific quiz button
+function enableQuizButtonForChapter(chapter) {
+    const button = document.querySelector(`#quiz-button-chapter-${chapter}`);
+    if (button) {
+        button.classList.remove("disabled");
+        button.style.pointerEvents = "auto";
+        button.style.opacity = "1";
+        console.log(`Enabled quiz button for Chapter ${chapter}.`);
+    }
+}
+
 // Mark video as watched
 function markVideoAsWatched(videoId, isGuestVideo) {
     const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
@@ -74,41 +95,57 @@ function checkAllVideosWatched(isGuestVideo) {
 
     if (watchedVideos === totalVideos.size && totalVideos.size > 0) {
         console.log(`All videos watched for ${isGuestVideo ? "guest" : "user"}. Enabling quiz button...`);
-        enableQuizButton(isGuestVideo);
+        enableQuizButtonForAllChapters(); // Enable all quiz buttons for completed videos
     } else {
-        console.log(`Not all videos are watched for ${isGuestVideo ? "guest" : "user"}. Disabling quiz button...`);
-        disableQuizButton(isGuestVideo);
+        console.log(`Not all videos are watched for ${isGuestVideo ? "guest" : "user"}.`);
     }
 }
 
-// Enable quiz button
-function enableQuizButton(isGuestVideo) {
-    const buttonSelector = isGuestVideo ? ".guest-quiz-button" : "#quiz-button";
-    const button = document.querySelector(buttonSelector);
-
-    if (button) {
-        button.classList.add("enabled");
+// Enable all quiz buttons for completed chapters
+function enableQuizButtonForAllChapters() {
+    document.querySelectorAll(".quiz-button").forEach((button) => {
         button.classList.remove("disabled");
         button.style.pointerEvents = "auto";
         button.style.opacity = "1";
-    } else {
-        console.warn(`Quiz button not found for ${isGuestVideo ? "guest" : "user"}.`);
-    }
+    });
+    console.log("Enabled all quiz buttons.");
 }
 
-// Disable quiz button
-function disableQuizButton(isGuestVideo) {
-    const buttonSelector = isGuestVideo ? ".guest-quiz-button" : "#quiz-button";
-    const button = document.querySelector(buttonSelector);
+// Attach handlers to enable buttons and tabs
+function attachTabClickHandlers() {
+    document.querySelectorAll("[data-w-tab]").forEach((tab) => {
+        const chapter = tab.getAttribute("data-w-tab").replace("Tab ", "");
+        const watchedLinkSelector = `.watched_link${chapter}`;
+        const tabSelector = `[data-w-tab='Tab ${chapter}']`;
 
-    if (button) {
-        button.classList.add("disabled");
-        button.classList.remove("enabled");
-        button.style.pointerEvents = "none";
-        button.style.opacity = "0.5";
-    } else {
-        console.warn(`Quiz button not found for ${isGuestVideo ? "guest" : "user"}.`);
-    }
+        const watchedLink = document.querySelector(watchedLinkSelector);
+        const tabElement = document.querySelector(tabSelector);
+
+        if (watchedLink && tabElement) {
+            watchedLink.addEventListener("click", () => {
+                tabElement.click();
+                enableQuizButtonForChapter(chapter);
+                console.log(`Tab ${chapter} clicked. Quiz button enabled.`);
+            });
+        } else {
+            console.warn(`Tab or watched link not found for Chapter ${chapter}.`);
+        }
+    });
+}
+
+// Monitor DOM changes dynamically to detect login state
+function monitorDomChanges() {
+    const observer = new MutationObserver(() => {
+        const isLoggedIn = detectLoginState();
+        console.log(`Login state detected: ${isLoggedIn ? "Logged In" : "Guest"}`);
+        initializeVimeoPlayers();
+        disableAllQuizButtons(); // Disable all buttons on DOM change
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
 }
 
 // Initialize Vimeo players dynamically
@@ -136,21 +173,6 @@ function initializeVimeoPlayers() {
     });
 }
 
-// Monitor DOM changes dynamically to detect login state
-function monitorDomChanges() {
-    const observer = new MutationObserver(() => {
-        const isLoggedIn = detectLoginState();
-        console.log(`Login state detected: ${isLoggedIn ? "Logged In" : "Guest"}`);
-        initializeVimeoPlayers();
-    });
-
-    // Observe changes to the body element
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-    });
-}
-
 // Load Vimeo Player API and initialize
 function loadScript(src, callback) {
     const script = document.createElement("script");
@@ -163,6 +185,8 @@ function loadScript(src, callback) {
 
 // On document ready
 document.addEventListener("DOMContentLoaded", () => {
+    disableAllQuizButtons(); // Disable all quiz buttons initially
+    attachTabClickHandlers(); // Attach tab click handlers
     loadScript("https://player.vimeo.com/api/player.js", () => {
         initializeVimeoPlayers();
         monitorDomChanges(); // Start monitoring DOM changes
