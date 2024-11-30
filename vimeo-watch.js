@@ -106,12 +106,3 @@ function loadScript(src, callback) {
     document.head.appendChild(script);
     console.log(`Loading script: ${src}`);
 }
-
-// On document ready
-document.addEventListener("DOMContentLoaded", () => {
-    disableAllQuizButtons(); // Disable all quiz buttons initially
-    loadScript("https://player.vimeo.com/api/player.js", () => {
-        initializeVimeoPlayers();
-        monitorDomChanges(); // Start monitoring DOM changes
-    });
-});
