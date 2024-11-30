@@ -94,18 +94,25 @@ function attachWatchedLinkClickHandler(chapter) {
     const tab = document.querySelector(tabSelector);
 
     if (watchedLink && tab) {
-        // Remove any previously attached click event listeners to avoid duplication
-        watchedLink.removeEventListener("click", handleWatchedLinkClick);
-
-        // Add a new click event listener
-        watchedLink.addEventListener("click", () => {
-            tab.click();
+        // Add or update the click event listener for the watched link
+        watchedLink.addEventListener("click", (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            tab.click(); // Simulate clicking on the tab
             console.log(`Navigated to Tab ${chapter} via ${watchedLinkSelector}.`);
         });
     } else {
-        console.warn(`Watched link or tab not found for Chapter ${chapter}.`);
+        console.warn(
+            `Could not attach handler: ${watchedLink ? '' : 'Watched link not found'} ${tab ? '' : 'Tab not found'} for Chapter ${chapter}.`
+        );
     }
 }
+
+// Example usage for watched_link1 and watched_link2
+document.addEventListener("DOMContentLoaded", () => {
+    attachWatchedLinkClickHandler(1); // For watched_link1 -> Tab 1
+    attachWatchedLinkClickHandler(2); // For watched_link2 -> Tab 2
+});
+
 
 // Check all videos watched
 function checkAllVideosWatched(isGuestVideo) {
