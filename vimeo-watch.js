@@ -32,76 +32,34 @@ function enableQuizButtonForChapter(chapter) {
     }
 }
 
-// Enable all quiz buttons for all chapters
-function enableAllQuizButtons() {
-    document.querySelectorAll(".quiz-button").forEach((button) => {
-        button.classList.remove("disabled");
-        button.style.pointerEvents = "auto";
-        button.style.opacity = "1";
-    });
-    console.log("Enabled all quiz buttons.");
-}
-
-// Mark video as watched
-function markVideoAsWatched(videoId, isGuestVideo) {
-    const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
-
-    if (videoWatched[videoId]) {
-        console.log(`Video ${videoId} is already marked as watched (${isGuestVideo ? "guest" : "user"}).`);
-        return; // Prevent duplicate marking
-    }
-
-    console.log(`Marking video ${videoId} as watched (${isGuestVideo ? "guest" : "user"}).`);
-    videoWatched[videoId] = true;
-
-    try {
-        const storageKey = isGuestVideo ? `guestVideoWatched_${pageKey}` : `userVideoWatched_${pageKey}`;
-        localStorage.setItem(storageKey, JSON.stringify(videoWatched));
-        checkAllVideosWatched(isGuestVideo);
-    } catch (error) {
-        console.error("Error updating localStorage:", error);
-    }
-}
-
-// Unhide completion elements dynamically and attach link handlers
-function unhideVideoComplete(videoId, chapter, isGuestVideo) {
-    console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
-    const targetClass = isGuestVideo ? `.guest_complete_${chapter}` : `.video_complete_${chapter}`;
-    const targetElements = document.querySelectorAll(targetClass);
-
-    if (targetElements.length > 0) {
-        targetElements.forEach((element) => element.classList.remove("hidden"));
-        console.log(`Unhid completion elements for Chapter ${chapter} (${isGuestVideo ? "Guest" : "User"}).`);
-    } else {
-        console.warn(`No completion elements found for Chapter ${chapter} (${isGuestVideo ? "Guest" : "User"}).`);
-    }
-
-    // Attach click handler to watched links
-    attachWatchedLinkClickHandler(chapter);
-}
-
 // Attach click handlers for watched links dynamically
-function attachWatchedLinkClickHandler(chapter) {
-    const watchedLinkSelector = chapter === 1 ? ".watched_link1" : ".watched_link2";
-    const targetTabSelector = chapter === 1 ? `[data-w-tab="Tab 0"]` : `[data-w-tab="Tab 1"]`;
+function attachWatchedLinkHandlers() {
+    // Define mappings between watched links and target tabs
+    const linksToTabs = {
+        ".watched_link1": "[data-w-tab='Tab 1']", // .watched_link1 navigates to Tab 1
+        ".watched_link2": "[data-w-tab='Tab 2']", // .watched_link2 navigates to Tab 2
+    };
 
-    const watchedLink = document.querySelector(watchedLinkSelector);
-    const targetTab = document.querySelector(targetTabSelector);
+    Object.keys(linksToTabs).forEach((linkSelector) => {
+        const targetTabSelector = linksToTabs[linkSelector];
+        const watchedLink = document.querySelector(linkSelector);
+        const targetTab = document.querySelector(targetTabSelector);
 
-    if (!watchedLink || !targetTab) {
-        console.warn(`Missing ${watchedLinkSelector} or ${targetTabSelector}.`);
-        return;
-    }
+        if (!watchedLink || !targetTab) {
+            console.warn(`Missing ${linkSelector} or ${targetTabSelector}.`);
+            return;
+        }
 
-    // Attach a single click handler
-    watchedLink.removeEventListener("click", handleWatchedLinkClick);
-    watchedLink.addEventListener("click", handleWatchedLinkClick);
+        // Attach click handler
+        watchedLink.removeEventListener("click", handleWatchedLinkClick);
+        watchedLink.addEventListener("click", handleWatchedLinkClick);
 
-    function handleWatchedLinkClick(event) {
-        event.preventDefault(); // Prevent default behavior
-        targetTab.click(); // Simulate clicking the tab
-        console.log(`Navigated to Tab ${chapter === 1 ? "0" : "1"} via ${watchedLinkSelector}.`);
-    }
+        function handleWatchedLinkClick(event) {
+            event.preventDefault(); // Prevent default behavior
+            targetTab.click(); // Simulate clicking the tab
+            console.log(`Navigated to ${targetTabSelector} via ${linkSelector}.`);
+        }
+    });
 }
 
 // Initialize Vimeo players dynamically
@@ -121,31 +79,13 @@ function initializeVimeoPlayers() {
 
         player.on("ended", () => {
             console.log(`Video ${videoId} ended.`);
-            markVideoAsWatched(videoId, isGuestVideo);
-            unhideVideoComplete(videoId, chapter, isGuestVideo);
             enableQuizButtonForChapter(chapter);
         });
 
         player.on("loaded", () => {
             console.log(`Video ${videoId} loaded successfully.`);
-            checkAllVideosWatched(isGuestVideo);
         });
     });
-}
-
-// Check all videos watched
-function checkAllVideosWatched(isGuestVideo) {
-    const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
-    const watchedVideos = Object.keys(videoWatched).filter((id) => videoWatched[id]).length;
-
-    console.log(
-        `Checking all videos watched for ${isGuestVideo ? "guest" : "user"}. Total videos: ${totalVideos.size}, Watched: ${watchedVideos}`
-    );
-
-    if (watchedVideos === totalVideos.size && totalVideos.size > 0) {
-        console.log("All videos watched. Enabling all quiz buttons.");
-        enableAllQuizButtons();
-    }
 }
 
 // DOM Content Loaded handler
@@ -153,10 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     disableAllQuizButtons(); // Disable all quiz buttons initially
     loadScript("https://player.vimeo.com/api/player.js", () => {
         initializeVimeoPlayers();
-
-        // Attach handlers for watched links
-        attachWatchedLinkClickHandler(1);
-        attachWatchedLinkClickHandler(2);
+        attachWatchedLinkHandlers(); // Attach handlers for watched links
     });
 });
 
