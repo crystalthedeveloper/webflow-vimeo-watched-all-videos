@@ -200,29 +200,11 @@ function initializeVimeoPlayers() {
     });
 }
 
-// Test function for `attachWatchedLink2Handler`
-function testAttachWatchedLink2Handler() {
-    console.log("Testing attachWatchedLink2Handler...");
-    const testElement = document.createElement("div");
-    testElement.className = "watched_link2";
-    document.body.appendChild(testElement);
-
-    const tabElement = document.createElement("div");
-    tabElement.setAttribute("data-w-tab", "Tab 2");
-    document.body.appendChild(tabElement);
-
-    attachWatchedLink2Handler();
-
-    testElement.click();
-    console.log("Clicked .watched_link2");
-}
-
 // DOM Content Loaded handler
 document.addEventListener("DOMContentLoaded", () => {
     disableQuizButton();
     loadScript("https://player.vimeo.com/api/player.js", () => {
         initializeVimeoPlayers();
-        testAttachWatchedLink2Handler(); // Test function
     });
 });
 
