@@ -48,14 +48,18 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Attach handler for `.watched_link1`
-function attachWatchedLink1Handler() {
-    attachWatchedLinkHandler(".watched_link1", "[data-w-tab='Tab 1']");
-}
+function attachTabClickHandlers(chapter) {
+    const tabSelector = `[data-w-tab='Tab ${chapter}']`;
+    const watchedLinkSelector = `.watched_link${chapter}`;
 
-// Attach handler for `.watched_link2`
-function attachWatchedLink2Handler() {
-    attachWatchedLinkHandler(".watched_link2", "[data-w-tab='Tab 2']");
+    if ($(watchedLinkSelector).length && $(tabSelector).length) {
+        $(watchedLinkSelector).off("click").on("click", () => {
+            $(tabSelector).click();
+            console.log(`Tab ${chapter} clicked via .watched_link${chapter}`);
+        });
+    } else {
+        console.log(`No tab or watched link found for Chapter ${chapter}.`);
+    }
 }
 
 // Generic function to attach watched link handlers
