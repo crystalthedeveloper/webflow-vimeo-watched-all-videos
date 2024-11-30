@@ -48,38 +48,14 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-function unhideVideoComplete(videoId, isGuestVideo) {
-    let iframe = $(`iframe[src*='${videoId}']`);
-    if (iframe.length > 0) {
-        let chapter = iframe.attr('id');
-        if (isGuestVideo) {
-            switch (chapter) {
-                case 'Chapter 1':
-                    $('.guest_complete_1').removeClass('hidden');
-                    break;
-                case 'Chapter 2':
-                    $('.guest_complete_2').removeClass('hidden');
-                    break;
-                case 'Chapter 3':
-                    $('.guest_complete_3').removeClass('hidden');
-                    break;
-            }
-        } else {
-            switch (chapter) {
-                case 'Chapter 1':
-                    $('.video_complete_1').removeClass('hidden');
-                    $('.watched_link1').click(() => $('[data-w-tab="Tab 1"]').click());
-                    break;
-                case 'Chapter 2':
-                    $('.video_complete_2').removeClass('hidden');
-                    $('.watched_link2').click(() => $('[data-w-tab="Tab 2"]').click());
-                    break;
-                case 'Chapter 3':
-                    $('.video_complete_3').removeClass('hidden');
-                    break;
-            }
-        }
-    }
+// Attach handler for `.watched_link1`
+function attachWatchedLink1Handler() {
+    attachWatchedLinkHandler(".watched_link1", "[data-w-tab='Tab 1']");
+}
+
+// Attach handler for `.watched_link2`
+function attachWatchedLink2Handler() {
+    attachWatchedLinkHandler(".watched_link2", "[data-w-tab='Tab 2']");
 }
 
 // Generic function to attach watched link handlers
@@ -224,11 +200,29 @@ function initializeVimeoPlayers() {
     });
 }
 
+// Test function for `attachWatchedLink2Handler`
+function testAttachWatchedLink2Handler() {
+    console.log("Testing attachWatchedLink2Handler...");
+    const testElement = document.createElement("div");
+    testElement.className = "watched_link2";
+    document.body.appendChild(testElement);
+
+    const tabElement = document.createElement("div");
+    tabElement.setAttribute("data-w-tab", "Tab 2");
+    document.body.appendChild(tabElement);
+
+    attachWatchedLink2Handler();
+
+    testElement.click();
+    console.log("Clicked .watched_link2");
+}
+
 // DOM Content Loaded handler
 document.addEventListener("DOMContentLoaded", () => {
     disableQuizButton();
     loadScript("https://player.vimeo.com/api/player.js", () => {
         initializeVimeoPlayers();
+        testAttachWatchedLink2Handler(); // Test function
     });
 });
 
