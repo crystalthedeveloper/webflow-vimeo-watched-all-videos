@@ -48,6 +48,38 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
+// Attach click handlers for watched links dynamically
+function attachWatchedLinkHandlers() {
+    if (isGuest()) return; // Guests do not have watched links
+
+    // Define mappings between watched links and target tabs
+    const linksToTabs = {
+        ".watched_link1": "[data-w-tab='Tab 1']", // .watched_link1 navigates to Tab 1
+        ".watched_link2": "[data-w-tab='Tab 2']", // .watched_link2 navigates to Tab 2
+    };
+
+    Object.keys(linksToTabs).forEach((linkSelector) => {
+        const targetTabSelector = linksToTabs[linkSelector];
+        const watchedLink = document.querySelector(linkSelector);
+        const targetTab = document.querySelector(targetTabSelector);
+
+        if (!watchedLink || !targetTab) {
+            console.warn(`Missing ${linkSelector} or ${targetTabSelector}.`);
+            return;
+        }
+
+        // Remove existing click handler to avoid duplication
+        watchedLink.removeEventListener("click", handleWatchedLinkClick);
+        watchedLink.addEventListener("click", handleWatchedLinkClick);
+
+        function handleWatchedLinkClick(event) {
+            event.preventDefault(); // Prevent default behavior
+            targetTab.click(); // Simulate clicking the tab
+            console.log(`Navigated to ${targetTabSelector} via ${linkSelector}.`);
+        }
+    });
+}
+
 // Unhide completion elements dynamically for both guests and logged-in users
 function unhideVideoComplete(videoId, chapter) {
     console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
@@ -71,6 +103,9 @@ function unhideVideoComplete(videoId, chapter) {
         if (userCompletionElements.length > 0) {
             userCompletionElements.forEach((element) => element.classList.remove("hidden"));
             console.log(`Unhid logged-in user completion elements for Chapter ${chapter}.`);
+
+            // Attach handlers for links within the newly unhidden elements
+            attachWatchedLinkHandlers();
         } else {
             console.warn(`No logged-in user completion elements found for Chapter ${chapter}.`);
         }
