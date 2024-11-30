@@ -85,10 +85,16 @@ function attachWatchedLinkHandler(linkSelector, targetTabSelector) {
 function activateTab(targetTabLink, targetTabSelector) {
     try {
         console.log(`Simulating click on ${targetTabSelector}...`);
-        targetTabLink.click();
-        console.log(`Simulated click on ${targetTabSelector}.`);
-    } catch (error) {
-        console.warn(`Error simulating click on ${targetTabSelector}:`, error);
+        // Explicitly simulate click for Webflow's tab system
+        const tabTrigger = targetTabLink.closest(".w-tab-link");
+        if (tabTrigger) {
+            tabTrigger.click(); // Use Webflow's built-in click event for tabs
+            console.log(`Simulated click on ${targetTabSelector}.`);
+            return;
+        }
+
+        // Fallback if no tab trigger is found
+        console.warn("Tab trigger not found. Falling back to manual activation.");
 
         const tabsContainer = targetTabLink.closest(".w-tabs");
         if (tabsContainer) {
@@ -124,6 +130,8 @@ function activateTab(targetTabLink, targetTabSelector) {
         } else {
             console.warn(`Could not find tabs container for ${targetTabSelector}.`);
         }
+    } catch (error) {
+        console.error(`Error activating tab ${targetTabSelector}:`, error);
     }
 }
 
