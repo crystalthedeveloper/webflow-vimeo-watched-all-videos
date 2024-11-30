@@ -16,14 +16,18 @@ function isGuestVideo(element) {
 // Monitor for changes in the DOM (e.g., login state change)
 function monitorLoginState() {
     const observer = new MutationObserver(() => {
-        const userVideoElements = document.querySelectorAll(".uservideo iframe[data-vimeo-id]");
-        const guestVideoElements = document.querySelectorAll(".guestvideo iframe[data-vimeo-id]");
+        const isLoggedIn = document.querySelectorAll(".uservideo iframe[data-vimeo-id]").length > 0;
 
-        // If userVideoElements are present, consider user logged in
-        const isLoggedIn = userVideoElements.length > 0;
+        const currentUserState = isLoggedIn ? "user" : "guest";
+        const previousUserState = localStorage.getItem("currentUserState") || "guest";
 
-        console.log("Login state updated:", isLoggedIn ? "Logged In" : "Guest");
-        initializeVimeoPlayers(); // Reinitialize players when state changes
+        if (currentUserState !== previousUserState) {
+            console.log("Login state updated:", isLoggedIn ? "Logged In" : "Guest");
+            localStorage.setItem("currentUserState", currentUserState);
+
+            // Reinitialize players with the new state
+            initializeVimeoPlayers();
+        }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
@@ -89,29 +93,34 @@ function disableQuizButton(isGuest) {
     }
 }
 
-// Initialize Vimeo players
+// Initialize Vimeo players (only once per state)
 function initializeVimeoPlayers() {
     console.log("Initializing Vimeo players...");
+
+    // Clear previous video IDs to prevent duplicates
+    totalVideos.clear();
 
     document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
         const videoId = iframe.getAttribute("data-vimeo-id");
         const isGuest = isGuestVideo(iframe.closest("div"));
 
-        console.log(`Initializing Vimeo player for video ID: ${videoId}, isGuestVideo: ${isGuest}`);
+        if (!totalVideos.has(videoId)) {
+            totalVideos.add(videoId);
 
-        if (!totalVideos.has(videoId)) totalVideos.add(videoId);
+            console.log(`Initializing Vimeo player for video ID: ${videoId}, isGuestVideo: ${isGuest}`);
 
-        const player = new Vimeo.Player(iframe);
+            const player = new Vimeo.Player(iframe);
 
-        player.on("ended", () => {
-            console.log(`Video ${videoId} ended.`);
-            markVideoAsWatched(videoId, isGuest);
-        });
+            player.on("ended", () => {
+                console.log(`Video ${videoId} ended.`);
+                markVideoAsWatched(videoId, isGuest);
+            });
 
-        player.on("loaded", () => {
-            console.log(`Video ${videoId} loaded successfully.`);
-            checkAllVideosWatched(isGuest);
-        });
+            player.on("loaded", () => {
+                console.log(`Video ${videoId} loaded successfully.`);
+                checkAllVideosWatched(isGuest);
+            });
+        }
     });
 }
 
@@ -131,4 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
         initializeVimeoPlayers();
         monitorLoginState();
     });
+
+    // Initialize state on page load
+    const isLoggedIn = document.querySelectorAll(".uservideo iframe[data-vimeo-id]").length > 0;
+    localStorage.setItem("currentUserState", isLoggedIn ? "user" : "guest");
 });
