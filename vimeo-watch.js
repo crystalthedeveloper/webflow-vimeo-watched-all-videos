@@ -86,44 +86,45 @@ function unhideVideoComplete(videoId, chapter, isGuestVideo) {
 }
 
 // Attach click handlers for watched links to navigate to their respective tabs
-function attachWatchedLinkClickHandler(chapter) {
-    const watchedLinkSelector = `.watched_link${chapter}`;
-    const tabSelector = `[data-w-tab='Tab ${chapter}']`;
+function waitForTab1AndAttachWatchedLink2() {
+    // Select the Tab 1 and Tab 2 elements
+    const tab1Element = document.querySelector("[data-w-tab='Tab 1']");
+    const tab2Element = document.querySelector("[data-w-tab='Tab 2']");
+    const watchedLink2 = document.querySelector(".watched_link2");
 
-    const watchedLink = document.querySelector(watchedLinkSelector);
-    const tab = document.querySelector(tabSelector);
+    if (!tab1Element || !tab2Element || !watchedLink2) {
+        console.warn("Required elements for Tab 1, Tab 2, or watched_link2 not found.");
+        return;
+    }
 
-    if (watchedLink && tab) {
-        // Attach the click handler
-        watchedLink.addEventListener("click", (event) => {
-            event.preventDefault(); // Prevent default link behavior
-            tab.click(); // Trigger click on the tab
-            console.log(`Navigated to Tab ${chapter} via ${watchedLinkSelector}.`);
-        });
-    } else {
-        console.warn(
-            `Handler not attached: ${watchedLink ? '' : 'Watched link not found'} ${
-                tab ? '' : 'Tab not found'
-            } for Chapter ${chapter}.`
-        );
+    // Monitor when Tab 1 becomes the active tab
+    const observer = new MutationObserver(() => {
+        if (tab1Element.classList.contains("w--current")) {
+            console.log("Tab 1 is now active. Attaching watched_link2 handler.");
+
+            // Ensure only one click handler is attached
+            watchedLink2.removeEventListener("click", handleWatchedLinkClick);
+            watchedLink2.addEventListener("click", handleWatchedLinkClick);
+
+            // Stop observing since the handler is attached
+            observer.disconnect();
+        }
+    });
+
+    // Observe changes to Tab 1's class attribute
+    observer.observe(tab1Element, { attributes: true, attributeFilter: ["class"] });
+
+    // Define the handler for watched_link2 click
+    function handleWatchedLinkClick(event) {
+        event.preventDefault(); // Prevent default link behavior
+        tab2Element.click(); // Simulate clicking on Tab 2
+        console.log("Navigated to Tab 2 via watched_link2.");
     }
 }
 
-// Reattach handlers after DOM changes
-function monitorWatchedLinks() {
-    document.querySelectorAll(".watched_link1, .watched_link2").forEach((link, index) => {
-        attachWatchedLinkClickHandler(index + 1);
-    });
-}
-
+// Call the function on document ready
 document.addEventListener("DOMContentLoaded", () => {
-    monitorWatchedLinks(); // Attach handlers initially
-
-    // Reattach handlers dynamically if DOM changes
-    const observer = new MutationObserver(() => {
-        monitorWatchedLinks();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    waitForTab1AndAttachWatchedLink2();
 });
 
 // Check all videos watched
