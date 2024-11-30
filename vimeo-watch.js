@@ -117,12 +117,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Check if the correct video is being displayed (for debugging)
     document.querySelectorAll("iframe").forEach((iframe) => {
-        console.log(`Video ID: ${iframe.getAttribute("data-vimeo-id")}, Display: ${iframe.style.display}`);
     });
 
     // Dynamically load the Vimeo API script and initialize players
     loadScript("https://player.vimeo.com/api/player.js", () => {
-        console.log("Vimeo API script loaded.");
         initializeVimeoPlayers();
     });
 });
