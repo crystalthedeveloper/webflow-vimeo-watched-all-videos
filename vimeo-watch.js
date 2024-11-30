@@ -9,6 +9,11 @@ let userVideoWatched = JSON.parse(localStorage.getItem(`userVideoWatched_${pageK
 
 let totalVideos = new Set(); // Set to store unique video IDs per page
 
+// Detect login state based on the presence of specific elements
+function isGuest() {
+    return !document.querySelector(".watched_link1"); // Guests have no links
+}
+
 // Disable all quiz buttons
 function disableAllQuizButtons() {
     document.querySelectorAll(".quiz-button").forEach((button) => {
@@ -32,25 +37,42 @@ function enableQuizButtonForChapter(chapter) {
     }
 }
 
-// Unhide completion elements dynamically and attach link handlers
+// Unhide completion elements dynamically for both guests and logged-in users
 function unhideVideoComplete(videoId, chapter) {
     console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
-    const completionClass = `.video_complete_${chapter}`;
-    const completionElements = document.querySelectorAll(completionClass);
 
-    if (completionElements.length > 0) {
-        completionElements.forEach((element) => element.classList.remove("hidden"));
-        console.log(`Unhid completion elements for Chapter ${chapter}.`);
+    if (isGuest()) {
+        // Handle guest user completion elements
+        const guestCompletionClass = `.guest_complete_${chapter}`;
+        const guestCompletionElements = document.querySelectorAll(guestCompletionClass);
+
+        if (guestCompletionElements.length > 0) {
+            guestCompletionElements.forEach((element) => element.classList.remove("hidden"));
+            console.log(`Unhid guest completion elements for Chapter ${chapter}.`);
+        } else {
+            console.warn(`No guest completion elements found for Chapter ${chapter}.`);
+        }
     } else {
-        console.warn(`No completion elements found for Chapter ${chapter}.`);
-    }
+        // Handle logged-in user completion elements
+        const userCompletionClass = `.video_complete_${chapter}`;
+        const userCompletionElements = document.querySelectorAll(userCompletionClass);
 
-    // Attach click handler for watched links
-    attachWatchedLinkHandlers();
+        if (userCompletionElements.length > 0) {
+            userCompletionElements.forEach((element) => element.classList.remove("hidden"));
+            console.log(`Unhid logged-in user completion elements for Chapter ${chapter}.`);
+        } else {
+            console.warn(`No logged-in user completion elements found for Chapter ${chapter}.`);
+        }
+
+        // Attach click handlers for watched links
+        attachWatchedLinkHandlers();
+    }
 }
 
 // Attach click handlers for watched links dynamically
 function attachWatchedLinkHandlers() {
+    if (isGuest()) return; // Guests do not have watched links
+
     // Define mappings between watched links and target tabs
     const linksToTabs = {
         ".watched_link1": "[data-w-tab='Tab 1']", // .watched_link1 navigates to Tab 1
