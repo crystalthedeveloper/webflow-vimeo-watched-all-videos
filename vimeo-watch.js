@@ -82,7 +82,16 @@ function attachWatchedLinkHandlers() {
         function handleWatchedLinkClick(event) {
             event.preventDefault(); // Prevent default behavior
             console.log(`Navigating to ${targetTabSelector} via ${linkSelector}...`);
-            targetTab.click(); // Simulate clicking the tab
+
+            if (targetTab.click) {
+                targetTab.click(); // Attempt to simulate a click
+                console.log(`Simulated click on ${targetTabSelector}.`);
+            } else {
+                console.warn(`Click method not available on ${targetTabSelector}.`);
+                // Fallback: Add or toggle a class for manual navigation
+                targetTab.classList.add('w--current'); // Example for Webflow tabs
+                console.log(`Manually set active state for ${targetTabSelector}.`);
+            }
         }
     });
 }
