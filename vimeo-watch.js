@@ -11,7 +11,7 @@ const totalVideos = new Set(); // Store unique video IDs per page
 
 // Detect login state based on the presence of specific elements
 function isGuest() {
-    return !document.querySelector(".user_video-wrap");
+    return !document.querySelector(".user_video-wrap"); // Check if user_video-wrap exists
 }
 
 // Disable the quiz button
@@ -40,21 +40,17 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Show or hide video wrappers based on login state
-function toggleVideoVisibility(isLoggedIn) {
-    const guestVideoWrap = document.querySelector(".guest_video-wrap");
+// Toggle visibility between user and guest video wrappers
+function toggleVideoVisibility() {
+    const isLoggedIn = !isGuest(); // Determine if user is logged in
     const userVideoWrap = document.querySelector(".user_video-wrap");
-
-    if (guestVideoWrap) {
-        guestVideoWrap.style.display = isLoggedIn ? "none" : "block";
-    } else {
-        console.warn("Guest video wrapper (.guest_video-wrap) not found.");
-    }
+    const guestVideoWrap = document.querySelector(".guest_video-wrap");
 
     if (userVideoWrap) {
         userVideoWrap.style.display = isLoggedIn ? "block" : "none";
-    } else {
-        console.warn("User video wrapper (.user_video-wrap) not found.");
+    }
+    if (guestVideoWrap) {
+        guestVideoWrap.style.display = isLoggedIn ? "none" : "block";
     }
 }
 
@@ -122,19 +118,16 @@ document.addEventListener("DOMContentLoaded", () => {
     disableQuizButton();
     loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
 
-    // Toggle video visibility based on user login state
-    const isLoggedIn = !isGuest();
-    toggleVideoVisibility(isLoggedIn);
-
-    // Simulate user login event for testing (remove in production)
-    setTimeout(() => {
-        const event = new Event("userSignedIn");
-        document.dispatchEvent(event);
-    }, 5000);
+    // Toggle visibility between user and guest video wrappers
+    toggleVideoVisibility();
 });
 
-// Handle user login to show/hide videos
+// Handle user login/logout events
 document.addEventListener("userSignedIn", () => {
-    toggleVideoVisibility(true);
+    toggleVideoVisibility(); // Show user_video-wrap and hide guest_video-wrap
     initializeVimeoPlayers(); // Ensure user videos are properly initialized
+});
+
+document.addEventListener("userSignedOut", () => {
+    toggleVideoVisibility(); // Show guest_video-wrap and hide user_video-wrap
 });
