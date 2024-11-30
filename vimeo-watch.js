@@ -49,89 +49,117 @@ function enableQuizButtonIfAllWatched() {
 }
 
 // Attach click handlers for watched links dynamically
-function attachWatchedLinkHandlers() {
-    if (isGuest()) return; // Guests do not have watched links
+function attachWatchedLink1Handler() {
+    const linkSelector = ".watched_link1";
+    const targetTabSelector = "[data-w-tab='Tab 1']";
+    const watchedLink = document.querySelector(linkSelector);
+    const targetTabLink = document.querySelector(targetTabSelector);
 
-    const linksToTabs = {
-        ".watched_link1": "[data-w-tab='Tab 1']", // .watched_link1 navigates to Tab 1
-        ".watched_link2": "[data-w-tab='Tab 2']", // .watched_link2 navigates to Tab 2
-    };
+    console.log(`Checking for ${linkSelector} and ${targetTabSelector}...`);
+    if (!watchedLink) {
+        console.warn(`Watched link ${linkSelector} not found.`);
+        return;
+    }
+    if (!targetTabLink) {
+        console.warn(`Target tab link ${targetTabSelector} not found.`);
+        return;
+    }
 
-    console.log("Attaching watched link handlers...");
-    Object.keys(linksToTabs).forEach((linkSelector) => {
-        const targetTabSelector = linksToTabs[linkSelector];
-        const watchedLink = document.querySelector(linkSelector);
-        const targetTabLink = document.querySelector(targetTabSelector);
+    console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
+    watchedLink.removeEventListener("click", handleWatchedLink1Click);
+    watchedLink.addEventListener("click", handleWatchedLink1Click);
 
-        console.log(`Checking for ${linkSelector} and ${targetTabSelector}...`);
-        if (!watchedLink) {
-            console.warn(`Watched link ${linkSelector} not found.`);
-            return;
-        }
-        if (!targetTabLink) {
-            console.warn(`Target tab link ${targetTabSelector} not found.`);
-            return;
-        }
+    function handleWatchedLink1Click(event) {
+        event.preventDefault();
+        console.log(`Click handler fired for ${linkSelector}`);
+        console.log(`Target tab:`, targetTabLink);
 
-        console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
-        watchedLink.removeEventListener("click", handleWatchedLinkClick);
-        watchedLink.addEventListener("click", handleWatchedLinkClick);
-
-        function handleWatchedLinkClick(event) {
-            event.preventDefault();
-            console.log(`Click handler fired for ${linkSelector}`);
-            console.log(`Target tab:`, targetTabLink);
-
-            // Simulate a click or manually activate the tab
-            try {
-                console.log(`Simulating click on ${targetTabSelector}...`);
-                targetTabLink.click();
-                console.log(`Simulated click on ${targetTabSelector}.`);
-            } catch (error) {
-                console.warn(`Error simulating click on ${targetTabSelector}:`, error);
-
-                // Fallback: Manually activate the tab
-                const tabsContainer = targetTabLink.closest(".w-tabs");
-                if (tabsContainer) {
-                    console.log(`Manually activating tab ${targetTabSelector}...`);
-
-                    // Deactivate all tabs and tab links
-                    const allTabs = tabsContainer.querySelectorAll("[data-w-tab]");
-                    const allTabLinks = tabsContainer.querySelectorAll(".w-tab-link");
-
-                    allTabs.forEach((tab) => {
-                        tab.classList.remove("w--tab-active");
-                        tab.setAttribute("aria-selected", "false");
-                    });
-
-                    allTabLinks.forEach((link) => {
-                        link.classList.remove("w--current");
-                    });
-
-                    // Activate the target tab and its link
-                    targetTabLink.classList.add("w--current");
-                    targetTabLink.setAttribute("aria-selected", "true");
-
-                    const targetTabContent = tabsContainer.querySelector(
-                        `[aria-controls="${targetTabLink.id}"]`
-                    );
-                    if (targetTabContent) {
-                        targetTabContent.classList.add("w--tab-active");
-                    } else {
-                        console.warn(
-                            `No tab content found for ${targetTabSelector} with aria-controls="${targetTabLink.id}".`
-                        );
-                    }
-
-                    console.log(`Activated tab link for ${targetTabSelector}.`);
-                } else {
-                    console.warn(`Could not find tabs container for ${targetTabSelector}.`);
-                }
-            }
-        }
-    });
+        activateTab(targetTabLink, targetTabSelector);
+    }
 }
 
+function attachWatchedLink2Handler() {
+    const linkSelector = ".watched_link2";
+    const targetTabSelector = "[data-w-tab='Tab 2']";
+    const watchedLink = document.querySelector(linkSelector);
+    const targetTabLink = document.querySelector(targetTabSelector);
+
+    console.log(`Checking for ${linkSelector} and ${targetTabSelector}...`);
+    if (!watchedLink) {
+        console.warn(`Watched link ${linkSelector} not found.`);
+        return;
+    }
+    if (!targetTabLink) {
+        console.warn(`Target tab link ${targetTabSelector} not found.`);
+        return;
+    }
+
+    console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
+    watchedLink.removeEventListener("click", handleWatchedLink2Click);
+    watchedLink.addEventListener("click", handleWatchedLink2Click);
+
+    function handleWatchedLink2Click(event) {
+        event.preventDefault();
+        console.log(`Click handler fired for ${linkSelector}`);
+        console.log(`Target tab:`, targetTabLink);
+
+        activateTab(targetTabLink, targetTabSelector);
+    }
+}
+
+function activateTab(targetTabLink, targetTabSelector) {
+    try {
+        console.log(`Simulating click on ${targetTabSelector}...`);
+        targetTabLink.click();
+        console.log(`Simulated click on ${targetTabSelector}.`);
+    } catch (error) {
+        console.warn(`Error simulating click on ${targetTabSelector}:`, error);
+
+        // Fallback: Manually activate the tab
+        const tabsContainer = targetTabLink.closest(".w-tabs");
+        if (tabsContainer) {
+            console.log(`Manually activating tab ${targetTabSelector}...`);
+
+            // Deactivate all tabs and tab links
+            const allTabs = tabsContainer.querySelectorAll("[data-w-tab]");
+            const allTabLinks = tabsContainer.querySelectorAll(".w-tab-link");
+
+            allTabs.forEach((tab) => {
+                tab.classList.remove("w--tab-active");
+                tab.setAttribute("aria-selected", "false");
+            });
+
+            allTabLinks.forEach((link) => {
+                link.classList.remove("w--current");
+            });
+
+            // Activate the target tab and its link
+            targetTabLink.classList.add("w--current");
+            targetTabLink.setAttribute("aria-selected", "true");
+
+            const targetTabContent = tabsContainer.querySelector(
+                `[aria-controls="${targetTabLink.id}"]`
+            );
+            if (targetTabContent) {
+                targetTabContent.classList.add("w--tab-active");
+            } else {
+                console.warn(
+                    `No tab content found for ${targetTabSelector} with aria-controls="${targetTabLink.id}".`
+                );
+            }
+
+            console.log(`Activated tab link for ${targetTabSelector}.`);
+        } else {
+            console.warn(`Could not find tabs container for ${targetTabSelector}.`);
+        }
+    }
+}
+
+function attachWatchedLinkHandlers() {
+    console.log("Attaching watched link handlers...");
+    attachWatchedLink1Handler();
+    attachWatchedLink2Handler();
+}
 
 // Unhide completion elements dynamically for both guests and logged-in users
 function unhideVideoComplete(videoId, chapter) {
