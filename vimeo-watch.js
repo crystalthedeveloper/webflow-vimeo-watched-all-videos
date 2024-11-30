@@ -84,6 +84,17 @@ function initializeVimeoPlayers() {
     });
 }
 
+// Refresh the user video embed on login
+function refreshUserVideoEmbed() {
+    // Remove existing iframes
+    document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
+        iframe.parentElement.removeChild(iframe);
+    });
+
+    // Reinitialize the players
+    loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
+}
+
 // Load external scripts dynamically
 function loadScript(src, callback) {
     const script = document.createElement("script");
@@ -97,4 +108,13 @@ function loadScript(src, callback) {
 document.addEventListener("DOMContentLoaded", () => {
     disableQuizButton();
     loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
+
+    // Simulate user login event for testing
+    document.addEventListener("userSignedIn", refreshUserVideoEmbed);
 });
+
+// Simulate a user login event (remove in production)
+setTimeout(() => {
+    const event = new Event("userSignedIn");
+    document.dispatchEvent(event);
+}, 5000); // Simulates login after 5 seconds
