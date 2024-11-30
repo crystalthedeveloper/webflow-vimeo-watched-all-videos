@@ -14,6 +14,16 @@ function detectLoginState() {
     return document.querySelector(".uservideo") !== null;
 }
 
+// Disable all quiz buttons
+function disableAllQuizButtons() {
+    document.querySelectorAll(".quiz-button").forEach((button) => {
+        button.classList.add("disabled");
+        button.style.pointerEvents = "none";
+        button.style.opacity = "0.5";
+        console.log("Disabled all quiz buttons.");
+    });
+}
+
 // Enable a specific quiz button for the given chapter
 function enableQuizButtonForChapter(chapter) {
     const button = document.querySelector(`#quiz-button-chapter-${chapter}`);
