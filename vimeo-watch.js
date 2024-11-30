@@ -19,6 +19,7 @@ function disableAllQuizButtons() {
     document.querySelectorAll(".quiz-button").forEach((button) => {
         button.classList.add("disabled");
         button.style.pointerEvents = "none";
+        button.style.opacity = "0.5";
         console.log("Disabled all quiz buttons.");
     });
 }
