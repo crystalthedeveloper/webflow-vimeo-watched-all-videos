@@ -14,26 +14,29 @@ function isGuest() {
     return !document.querySelector(".watched_link1"); // Guests have no links
 }
 
-// Disable all quiz buttons
-function disableAllQuizButtons() {
-    document.querySelectorAll(".quiz-button").forEach((button) => {
+// Disable the quiz button
+function disableQuizButton() {
+    const button = document.querySelector(".quiz-button");
+    if (button) {
         button.classList.add("disabled");
         button.style.pointerEvents = "none";
         button.style.opacity = "0.5";
-        console.log("Disabled all quiz buttons.");
-    });
+        console.log("Disabled the quiz button.");
+    } else {
+        console.warn("Quiz button not found on the page.");
+    }
 }
 
-// Enable a specific quiz button for the given chapter
-function enableQuizButtonForChapter(chapter) {
-    const button = document.querySelector(`#quiz-button-chapter-${chapter}`);
+// Enable the quiz button
+function enableQuizButton() {
+    const button = document.querySelector(".quiz-button");
     if (button) {
         button.classList.remove("disabled");
         button.style.pointerEvents = "auto";
         button.style.opacity = "1";
-        console.log(`Enabled quiz button for Chapter ${chapter}.`);
+        console.log("Enabled the quiz button.");
     } else {
-        console.warn(`Quiz button for Chapter ${chapter} not found.`);
+        console.warn("Quiz button not found on the page.");
     }
 }
 
@@ -116,7 +119,7 @@ function initializeVimeoPlayers() {
         player.on("ended", () => {
             console.log(`Video ${videoId} ended.`);
             unhideVideoComplete(videoId, chapter);
-            enableQuizButtonForChapter(chapter);
+            enableQuizButton();
         });
 
         player.on("loaded", () => {
@@ -127,7 +130,7 @@ function initializeVimeoPlayers() {
 
 // DOM Content Loaded handler
 document.addEventListener("DOMContentLoaded", () => {
-    disableAllQuizButtons(); // Disable all quiz buttons initially
+    disableQuizButton(); // Disable the quiz button initially
     loadScript("https://player.vimeo.com/api/player.js", () => {
         initializeVimeoPlayers();
         attachWatchedLinkHandlers(); // Attach handlers for watched links
