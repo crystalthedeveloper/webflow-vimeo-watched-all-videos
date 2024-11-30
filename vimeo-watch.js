@@ -40,18 +40,24 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Show user videos and hide guest videos based on login state
+// Show or hide video wrappers based on login state
 function toggleVideoVisibility(isLoggedIn) {
     const guestVideoWrap = document.querySelector(".guest_video-wrap");
     const userVideoWrap = document.querySelector(".user_video-wrap");
 
-    if (isLoggedIn) {
-        if (guestVideoWrap) guestVideoWrap.style.display = "none";
-        if (userVideoWrap) userVideoWrap.style.display = "block";
+    if (guestVideoWrap) {
+        guestVideoWrap.style.display = isLoggedIn ? "none" : "block";
     } else {
-        if (guestVideoWrap) guestVideoWrap.style.display = "block";
-        if (userVideoWrap) userVideoWrap.style.display = "none";
+        console.warn("Guest video wrapper (.guest_video-wrap) not found.");
     }
+
+    if (userVideoWrap) {
+        userVideoWrap.style.display = isLoggedIn ? "block" : "none";
+    } else {
+        console.warn("User video wrapper (.user_video-wrap) not found.");
+    }
+
+    console.log(`Visibility toggled. Logged in: ${isLoggedIn}`);
 }
 
 // Unhide completion elements and attach click handlers
@@ -119,7 +125,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
 
     // Toggle video visibility on user login state
-    toggleVideoVisibility(!isGuest());
+    const isLoggedIn = !isGuest();
+    toggleVideoVisibility(isLoggedIn);
 
     // Simulate user login event for testing (remove in production)
     setTimeout(() => {
