@@ -82,20 +82,16 @@ function attachWatchedLinkHandlers() {
             console.log(`Click handler fired for ${linkSelector}`);
             console.log(`Target tab:`, targetTab);
 
-            // Simulate Webflow's click behavior
             try {
-                if (targetTab.click) {
-                    console.log(`Simulating click on ${targetTabSelector}...`);
-                    targetTab.click(); // Simulate click
-                    console.log(`Simulated click on ${targetTabSelector}.`);
-                } else {
-                    console.warn(`Click method not available on ${targetTabSelector}.`);
-                }
+                // Simulate Webflow's native click behavior
+                console.log(`Simulating click on ${targetTabSelector}...`);
+                targetTab.click();
+                console.log(`Simulated click on ${targetTabSelector}.`);
             } catch (error) {
                 console.error(`Error clicking ${targetTabSelector}:`, error);
             }
 
-            // Fallback: manually toggle active state for Webflow tabs
+            // Fallback: manually toggle the active state
             const tabContainer = targetTab.closest(".w-tabs");
             if (tabContainer) {
                 console.log(`Manually activating tab ${targetTabSelector}...`);
@@ -108,13 +104,19 @@ function attachWatchedLinkHandlers() {
 
                 // Add active state to the target tab and its corresponding link
                 targetTab.classList.add("w--tab-active");
-                const correspondingTabLink = tabContainer.querySelector(`[data-w-tab='${targetTab.getAttribute("data-w-tab")}']`);
+                const correspondingTabLink = tabContainer.querySelector(
+                    `.w-tab-link[data-w-tab='${targetTab.getAttribute("data-w-tab")}']`
+                );
                 if (correspondingTabLink) {
                     correspondingTabLink.classList.add("w--current");
                     console.log(`Activated tab link for ${targetTabSelector}.`);
                 } else {
                     console.warn(`Could not find corresponding tab link for ${targetTabSelector}.`);
                 }
+
+                // Manually set aria-selected attributes for accessibility
+                allTabs.forEach((tab) => tab.setAttribute("aria-selected", "false"));
+                targetTab.setAttribute("aria-selected", "true");
             } else {
                 console.warn(`Could not find tab container for ${targetTabSelector}.`);
             }
