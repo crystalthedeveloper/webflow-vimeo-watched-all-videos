@@ -84,14 +84,18 @@ function initializeVimeoPlayers() {
     });
 }
 
-// Refresh the user video embed on login
+// Refresh user video embeds
 function refreshUserVideoEmbed() {
-    // Remove existing iframes
     document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
-        iframe.parentElement.removeChild(iframe);
+        const videoId = iframe.getAttribute("data-vimeo-id");
+
+        // Reset the iframe by replacing it with a clone
+        const parent = iframe.parentElement;
+        const clone = iframe.cloneNode(true);
+        parent.replaceChild(clone, iframe);
     });
 
-    // Reinitialize the players
+    // Reload Vimeo API and reinitialize players
     loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
 }
 
