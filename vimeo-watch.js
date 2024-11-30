@@ -9,6 +9,11 @@ let userVideoWatched = JSON.parse(localStorage.getItem(`userVideoWatched_${pageK
 
 let totalVideos = new Set(); // Set to store unique video IDs per page
 
+// Detect login state based on the presence of "uservideo" or "guestvideo" classes
+function detectLoginState() {
+    return document.querySelector(".uservideo") !== null;
+}
+
 // Mark video as watched
 function markVideoAsWatched(videoId, isGuestVideo) {
     const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
@@ -30,7 +35,7 @@ function markVideoAsWatched(videoId, isGuestVideo) {
     }
 }
 
-// Unhide completion elements
+// Unhide completion elements dynamically
 function unhideVideoComplete(videoId, isGuestVideo) {
     console.log(`Attempting to unhide completion elements for video ID: ${videoId}`);
     const iframe = document.querySelector(`iframe[data-vimeo-id='${videoId}']`);
@@ -50,30 +55,11 @@ function unhideVideoComplete(videoId, isGuestVideo) {
         if (targetElements.length > 0) {
             targetElements.forEach((element) => element.classList.remove("hidden"));
             console.log(`Unhiding ${isGuestVideo ? "guest" : "user"} completion for Chapter ${chapter}`);
-            if (!isGuestVideo) attachTabClickHandlers(chapter);
         } else {
             console.warn(`No matching ${isGuestVideo ? "guest" : "user"} completion elements for Chapter: ${chapter}`);
         }
     } else {
         console.warn(`No iframe found for video ID: ${videoId}`);
-    }
-}
-
-// Attach tab click handlers
-function attachTabClickHandlers(chapter) {
-    const tabSelector = `[data-w-tab='Tab ${chapter}']`;
-    const watchedLinkSelector = `.watched_link${chapter}`;
-
-    const tabElement = document.querySelector(tabSelector);
-    const watchedLinkElement = document.querySelector(watchedLinkSelector);
-
-    if (watchedLinkElement && tabElement) {
-        watchedLinkElement.addEventListener("click", () => {
-            tabElement.click();
-            console.log(`Tab ${chapter} clicked via .watched_link${chapter}`);
-        });
-    } else {
-        console.log(`No tab or watched link found for Chapter ${chapter}.`);
     }
 }
 
@@ -125,7 +111,7 @@ function disableQuizButton(isGuestVideo) {
     }
 }
 
-// Initialize Vimeo players
+// Initialize Vimeo players dynamically
 function initializeVimeoPlayers() {
     console.log("Initializing Vimeo players...");
     document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
@@ -150,18 +136,20 @@ function initializeVimeoPlayers() {
     });
 }
 
-// Detect login state dynamically
-function detectLoginState() {
-    const loggedInState = document.querySelector(".uservideo") !== null;
-    console.log(`Login state updated: ${loggedInState ? "Logged In" : "Guest"}`);
-    return loggedInState;
-}
+// Monitor DOM changes dynamically to detect login state
+function monitorDomChanges() {
+    const observer = new MutationObserver(() => {
+        const isLoggedIn = detectLoginState();
+        console.log(`Login state detected: ${isLoggedIn ? "Logged In" : "Guest"}`);
+        initializeVimeoPlayers();
+    });
 
-// Monitor login state and refresh dynamically
-setInterval(() => {
-    const isLoggedIn = detectLoginState();
-    initializeVimeoPlayers();
-}, 3000);
+    // Observe changes to the body element
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
+}
 
 // Load Vimeo Player API and initialize
 function loadScript(src, callback) {
@@ -173,6 +161,10 @@ function loadScript(src, callback) {
     console.log(`Loading script: ${src}`);
 }
 
+// On document ready
 document.addEventListener("DOMContentLoaded", () => {
-    loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
+    loadScript("https://player.vimeo.com/api/player.js", () => {
+        initializeVimeoPlayers();
+        monitorDomChanges(); // Start monitoring DOM changes
+    });
 });
