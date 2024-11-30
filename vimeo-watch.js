@@ -52,7 +52,6 @@ function enableQuizButtonIfAllWatched() {
 function attachWatchedLinkHandlers() {
     if (isGuest()) return; // Guests do not have watched links
 
-    // Define mappings between watched links and target tabs
     const linksToTabs = {
         ".watched_link1": "[data-w-tab='Tab 1']", // .watched_link1 navigates to Tab 1
         ".watched_link2": "[data-w-tab='Tab 2']", // .watched_link2 navigates to Tab 2
@@ -75,21 +74,22 @@ function attachWatchedLinkHandlers() {
         }
 
         console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
-        // Remove existing click handler to avoid duplication
         watchedLink.removeEventListener("click", handleWatchedLinkClick);
         watchedLink.addEventListener("click", handleWatchedLinkClick);
 
         function handleWatchedLinkClick(event) {
-            event.preventDefault(); // Prevent default behavior
-            console.log(`Navigating to ${targetTabSelector} via ${linkSelector}...`);
+            event.preventDefault();
+            console.log(`Click handler fired for ${linkSelector}`);
+            console.dir(targetTab);
 
             if (targetTab.click) {
-                targetTab.click(); // Attempt to simulate a click
+                targetTab.click();
                 console.log(`Simulated click on ${targetTabSelector}.`);
             } else {
                 console.warn(`Click method not available on ${targetTabSelector}.`);
-                // Fallback: Add or toggle a class for manual navigation
-                targetTab.classList.add('w--current'); // Example for Webflow tabs
+                const allTabs = document.querySelectorAll("[data-w-tab]");
+                allTabs.forEach((tab) => tab.classList.remove('w--current')); // Remove current
+                targetTab.classList.add('w--current'); // Add active state
                 console.log(`Manually set active state for ${targetTabSelector}.`);
             }
         }
