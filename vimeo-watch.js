@@ -78,7 +78,6 @@ function attachWatchedLinkHandler(linkSelector, targetTabSelector) {
     }
 
     console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
-    watchedLink.removeEventListener("click", handleWatchedLinkClick);
     watchedLink.addEventListener("click", (event) => {
         event.preventDefault();
         console.log(`Click handler fired for ${linkSelector}`);
