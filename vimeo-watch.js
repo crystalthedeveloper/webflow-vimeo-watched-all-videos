@@ -48,39 +48,22 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Attach click handlers for watched links dynamically
+// Attach handler for .watched_link1
 function attachWatchedLink1Handler() {
     const linkSelector = ".watched_link1";
     const targetTabSelector = "[data-w-tab='Tab 1']";
-    const watchedLink = document.querySelector(linkSelector);
-    const targetTabLink = document.querySelector(targetTabSelector);
-
-    console.log(`Checking for ${linkSelector} and ${targetTabSelector}...`);
-    if (!watchedLink) {
-        console.warn(`Watched link ${linkSelector} not found.`);
-        return;
-    }
-    if (!targetTabLink) {
-        console.warn(`Target tab link ${targetTabSelector} not found.`);
-        return;
-    }
-
-    console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
-    watchedLink.removeEventListener("click", handleWatchedLink1Click);
-    watchedLink.addEventListener("click", handleWatchedLink1Click);
-
-    function handleWatchedLink1Click(event) {
-        event.preventDefault();
-        console.log(`Click handler fired for ${linkSelector}`);
-        console.log(`Target tab:`, targetTabLink);
-
-        activateTab(targetTabLink, targetTabSelector);
-    }
+    attachWatchedLinkHandler(linkSelector, targetTabSelector);
 }
 
+// Attach handler for .watched_link2
 function attachWatchedLink2Handler() {
     const linkSelector = ".watched_link2";
     const targetTabSelector = "[data-w-tab='Tab 2']";
+    attachWatchedLinkHandler(linkSelector, targetTabSelector);
+}
+
+// Generic handler for attaching watched links
+function attachWatchedLinkHandler(linkSelector, targetTabSelector) {
     const watchedLink = document.querySelector(linkSelector);
     const targetTabLink = document.querySelector(targetTabSelector);
 
@@ -90,23 +73,20 @@ function attachWatchedLink2Handler() {
         return;
     }
     if (!targetTabLink) {
-        console.warn(`Target tab link ${targetTabSelector} not found.`);
+        console.warn(`Target tab ${targetTabSelector} not found.`);
         return;
     }
 
     console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
-    watchedLink.removeEventListener("click", handleWatchedLink2Click);
-    watchedLink.addEventListener("click", handleWatchedLink2Click);
-
-    function handleWatchedLink2Click(event) {
+    watchedLink.removeEventListener("click", handleWatchedLinkClick);
+    watchedLink.addEventListener("click", (event) => {
         event.preventDefault();
         console.log(`Click handler fired for ${linkSelector}`);
-        console.log(`Target tab:`, targetTabLink);
-
         activateTab(targetTabLink, targetTabSelector);
-    }
+    });
 }
 
+// Activate tab with fallback
 function activateTab(targetTabLink, targetTabSelector) {
     try {
         console.log(`Simulating click on ${targetTabSelector}...`);
@@ -115,12 +95,10 @@ function activateTab(targetTabLink, targetTabSelector) {
     } catch (error) {
         console.warn(`Error simulating click on ${targetTabSelector}:`, error);
 
-        // Fallback: Manually activate the tab
         const tabsContainer = targetTabLink.closest(".w-tabs");
         if (tabsContainer) {
             console.log(`Manually activating tab ${targetTabSelector}...`);
 
-            // Deactivate all tabs and tab links
             const allTabs = tabsContainer.querySelectorAll("[data-w-tab]");
             const allTabLinks = tabsContainer.querySelectorAll(".w-tab-link");
 
@@ -133,7 +111,6 @@ function activateTab(targetTabLink, targetTabSelector) {
                 link.classList.remove("w--current");
             });
 
-            // Activate the target tab and its link
             targetTabLink.classList.add("w--current");
             targetTabLink.setAttribute("aria-selected", "true");
 
@@ -161,12 +138,11 @@ function attachWatchedLinkHandlers() {
     attachWatchedLink2Handler();
 }
 
-// Unhide completion elements dynamically for both guests and logged-in users
+// Unhide completion elements dynamically
 function unhideVideoComplete(videoId, chapter) {
     console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
 
     if (isGuest()) {
-        // Handle guest user completion elements
         const guestCompletionClass = `.guest_complete_${chapter}`;
         const guestCompletionElements = document.querySelectorAll(guestCompletionClass);
 
@@ -177,23 +153,18 @@ function unhideVideoComplete(videoId, chapter) {
             console.warn(`No guest completion elements found for Chapter ${chapter}.`);
         }
     } else {
-        // Handle logged-in user completion elements
         const userCompletionClass = `.video_complete_${chapter}`;
         const userCompletionElements = document.querySelectorAll(userCompletionClass);
 
         if (userCompletionElements.length > 0) {
             userCompletionElements.forEach((element) => element.classList.remove("hidden"));
             console.log(`Unhid logged-in user completion elements for Chapter ${chapter}.`);
-
-            // Attach watched link handler dynamically
-            console.log("Re-attaching watched link handlers after unhide...");
             attachWatchedLinkHandlers();
         } else {
             console.warn(`No logged-in user completion elements found for Chapter ${chapter}.`);
         }
     }
 
-    // Check if all videos are watched to enable the quiz button
     enableQuizButtonIfAllWatched();
 }
 
@@ -211,8 +182,6 @@ function initializeVimeoPlayers() {
 
         player.on("ended", () => {
             console.log(`Video ${videoId} ended.`);
-
-            // Mark video as watched
             if (isGuest()) {
                 guestVideoWatched[videoId] = true;
                 localStorage.setItem(
@@ -238,13 +207,12 @@ function initializeVimeoPlayers() {
 
 // DOM Content Loaded handler
 document.addEventListener("DOMContentLoaded", () => {
-    disableQuizButton(); // Disable the quiz button initially
+    disableQuizButton();
     loadScript("https://player.vimeo.com/api/player.js", () => {
         initializeVimeoPlayers();
     });
 });
 
-// Load Vimeo Player API dynamically
 function loadScript(src, callback) {
     const script = document.createElement("script");
     script.src = src;
