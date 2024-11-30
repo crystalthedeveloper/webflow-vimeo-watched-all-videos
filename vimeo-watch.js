@@ -69,14 +69,12 @@ function attachWatchedLinkHandlers() {
         }
 
         // Remove existing click handler to avoid duplication
-        watchedLink.removeEventListener("click", handleWatchedLinkClick);
-        watchedLink.addEventListener("click", handleWatchedLinkClick);
-
-        function handleWatchedLinkClick(event) {
+        watchedLink.onclick = null; // Remove any previous handlers
+        watchedLink.addEventListener("click", (event) => {
             event.preventDefault(); // Prevent default behavior
             targetTab.click(); // Simulate clicking the tab
             console.log(`Navigated to ${targetTabSelector} via ${linkSelector}.`);
-        }
+        });
     });
 }
 
@@ -105,7 +103,7 @@ function unhideVideoComplete(videoId, chapter) {
             console.log(`Unhid logged-in user completion elements for Chapter ${chapter}.`);
 
             // Attach handlers for links within the newly unhidden elements
-            attachWatchedLinkHandlers();
+            attachWatchedLinkHandlers(); // Ensure handlers are re-attached after unhide
         } else {
             console.warn(`No logged-in user completion elements found for Chapter ${chapter}.`);
         }
@@ -145,7 +143,7 @@ function initializeVimeoPlayers() {
                 );
             }
 
-            unhideVideoComplete(videoId, chapter);
+            unhideVideoComplete(videoId, chapter); // Unhide completion elements
         });
 
         player.on("loaded", () => {
