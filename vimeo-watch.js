@@ -32,6 +32,23 @@ function enableQuizButtonForChapter(chapter) {
     }
 }
 
+// Unhide completion elements dynamically and attach link handlers
+function unhideVideoComplete(videoId, chapter) {
+    console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
+    const completionClass = `.video_complete_${chapter}`;
+    const completionElements = document.querySelectorAll(completionClass);
+
+    if (completionElements.length > 0) {
+        completionElements.forEach((element) => element.classList.remove("hidden"));
+        console.log(`Unhid completion elements for Chapter ${chapter}.`);
+    } else {
+        console.warn(`No completion elements found for Chapter ${chapter}.`);
+    }
+
+    // Attach click handler for watched links
+    attachWatchedLinkHandlers();
+}
+
 // Attach click handlers for watched links dynamically
 function attachWatchedLinkHandlers() {
     // Define mappings between watched links and target tabs
@@ -50,7 +67,7 @@ function attachWatchedLinkHandlers() {
             return;
         }
 
-        // Attach click handler
+        // Remove existing click handler to avoid duplication
         watchedLink.removeEventListener("click", handleWatchedLinkClick);
         watchedLink.addEventListener("click", handleWatchedLinkClick);
 
@@ -68,17 +85,15 @@ function initializeVimeoPlayers() {
     document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
         const videoId = iframe.getAttribute("data-vimeo-id");
         const chapter = parseInt(iframe.closest("[id^='Chapter']").id.replace("Chapter ", ""), 10);
-        const isGuestVideo = iframe.closest(".guestvideo") !== null;
 
-        console.log(
-            `Initializing Vimeo player for video ID: ${videoId}, Chapter: ${chapter}, isGuestVideo: ${isGuestVideo}`
-        );
+        console.log(`Initializing Vimeo player for video ID: ${videoId}, Chapter: ${chapter}`);
         if (!totalVideos.has(videoId)) totalVideos.add(videoId);
 
         const player = new Vimeo.Player(iframe);
 
         player.on("ended", () => {
             console.log(`Video ${videoId} ended.`);
+            unhideVideoComplete(videoId, chapter);
             enableQuizButtonForChapter(chapter);
         });
 
