@@ -9,11 +9,6 @@ let userVideoWatched = JSON.parse(localStorage.getItem(`userVideoWatched_${pageK
 
 let totalVideos = new Set(); // Set to store unique video IDs per page
 
-// Detect login state based on the presence of "uservideo" or "guestvideo" classes
-function detectLoginState() {
-    return document.querySelector(".uservideo") !== null;
-}
-
 // Disable all quiz buttons
 function disableAllQuizButtons() {
     document.querySelectorAll(".quiz-button").forEach((button) => {
@@ -87,11 +82,14 @@ function unhideVideoComplete(videoId, chapter, isGuestVideo) {
 
 // Attach click handlers for watched links dynamically
 function attachWatchedLinkClickHandler(chapter) {
-    const watchedLink = document.querySelector(`.watched_link${chapter}`);
-    const targetTab = document.querySelector(`[data-w-tab='Tab ${chapter}']`);
+    const watchedLinkSelector = chapter === 1 ? ".watched_link1" : ".watched_link2";
+    const targetTabSelector = chapter === 1 ? `[data-w-tab="Tab 0"]` : `[data-w-tab="Tab 1"]`;
+
+    const watchedLink = document.querySelector(watchedLinkSelector);
+    const targetTab = document.querySelector(targetTabSelector);
 
     if (!watchedLink || !targetTab) {
-        console.warn(`Missing watched_link${chapter} or Tab ${chapter}.`);
+        console.warn(`Missing ${watchedLinkSelector} or ${targetTabSelector}.`);
         return;
     }
 
@@ -102,7 +100,7 @@ function attachWatchedLinkClickHandler(chapter) {
     function handleWatchedLinkClick(event) {
         event.preventDefault(); // Prevent default behavior
         targetTab.click(); // Simulate clicking the tab
-        console.log(`Navigated to Tab ${chapter} via watched_link${chapter}.`);
+        console.log(`Navigated to Tab ${chapter === 1 ? "0" : "1"} via ${watchedLinkSelector}.`);
     }
 }
 
@@ -159,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Attach handlers for watched links
         attachWatchedLinkClickHandler(1);
         attachWatchedLinkClickHandler(2);
-        attachWatchedLinkClickHandler(3);
     });
 });
 
