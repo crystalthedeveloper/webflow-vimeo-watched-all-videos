@@ -65,8 +65,12 @@ function attachWatchedLinkHandlers() {
         const targetTab = document.querySelector(targetTabSelector);
 
         console.log(`Checking for ${linkSelector} and ${targetTabSelector}...`);
-        if (!watchedLink || !targetTab) {
-            console.warn(`Missing ${linkSelector} or ${targetTabSelector}.`);
+        if (!watchedLink) {
+            console.warn(`Watched link ${linkSelector} not found.`);
+            return;
+        }
+        if (!targetTab) {
+            console.warn(`Target tab ${targetTabSelector} not found.`);
             return;
         }
 
