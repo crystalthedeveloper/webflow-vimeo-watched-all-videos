@@ -101,14 +101,19 @@ function attachWatchedLinkHandlers() {
                 console.log(`Manually activating tab ${targetTabSelector}...`);
                 const allTabs = tabContainer.querySelectorAll("[data-w-tab]");
                 const allTabLinks = tabContainer.querySelectorAll(".w-tab-link");
-                allTabs.forEach((tab) => tab.classList.remove("w--tab-active")); // Remove active state
-                allTabLinks.forEach((link) => link.classList.remove("w--current")); // Remove current state
 
-                targetTab.classList.add("w--tab-active"); // Add active state
-                const correspondingTabLink = tabContainer.querySelector(`[data-w-tab-link='${targetTabSelector}']`);
+                // Remove active state from all tabs and links
+                allTabs.forEach((tab) => tab.classList.remove("w--tab-active"));
+                allTabLinks.forEach((link) => link.classList.remove("w--current"));
+
+                // Add active state to the target tab and its corresponding link
+                targetTab.classList.add("w--tab-active");
+                const correspondingTabLink = tabContainer.querySelector(`[data-w-tab='${targetTab.getAttribute("data-w-tab")}']`);
                 if (correspondingTabLink) {
-                    correspondingTabLink.classList.add("w--current"); // Activate tab link
+                    correspondingTabLink.classList.add("w--current");
                     console.log(`Activated tab link for ${targetTabSelector}.`);
+                } else {
+                    console.warn(`Could not find corresponding tab link for ${targetTabSelector}.`);
                 }
             } else {
                 console.warn(`Could not find tab container for ${targetTabSelector}.`);
