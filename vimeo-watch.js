@@ -94,25 +94,37 @@ function attachWatchedLinkClickHandler(chapter) {
     const tab = document.querySelector(tabSelector);
 
     if (watchedLink && tab) {
-        // Add or update the click event listener for the watched link
+        // Attach the click handler
         watchedLink.addEventListener("click", (event) => {
             event.preventDefault(); // Prevent default link behavior
-            tab.click(); // Simulate clicking on the tab
+            tab.click(); // Trigger click on the tab
             console.log(`Navigated to Tab ${chapter} via ${watchedLinkSelector}.`);
         });
     } else {
         console.warn(
-            `Could not attach handler: ${watchedLink ? '' : 'Watched link not found'} ${tab ? '' : 'Tab not found'} for Chapter ${chapter}.`
+            `Handler not attached: ${watchedLink ? '' : 'Watched link not found'} ${
+                tab ? '' : 'Tab not found'
+            } for Chapter ${chapter}.`
         );
     }
 }
 
-// Example usage for watched_link1 and watched_link2
-document.addEventListener("DOMContentLoaded", () => {
-    attachWatchedLinkClickHandler(1); // For watched_link1 -> Tab 1
-    attachWatchedLinkClickHandler(2); // For watched_link2 -> Tab 2
-});
+// Reattach handlers after DOM changes
+function monitorWatchedLinks() {
+    document.querySelectorAll(".watched_link1, .watched_link2").forEach((link, index) => {
+        attachWatchedLinkClickHandler(index + 1);
+    });
+}
 
+document.addEventListener("DOMContentLoaded", () => {
+    monitorWatchedLinks(); // Attach handlers initially
+
+    // Reattach handlers dynamically if DOM changes
+    const observer = new MutationObserver(() => {
+        monitorWatchedLinks();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+});
 
 // Check all videos watched
 function checkAllVideosWatched(isGuestVideo) {
