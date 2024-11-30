@@ -81,64 +81,28 @@ function unhideVideoComplete(videoId, chapter, isGuestVideo) {
         console.warn(`No completion elements found for Chapter ${chapter} (${isGuestVideo ? "Guest" : "User"}).`);
     }
 
-    // Attach click handler to the watched link for navigation
+    // Attach click handler to watched links
     attachWatchedLinkClickHandler(chapter);
 }
 
-// Attach click handlers for watched links to navigate to their respective tabs
-function waitForTab1AndAttachWatchedLink2() {
-    // Select the Tab 1 and Tab 2 elements
-    const tab1Element = document.querySelector("[data-w-tab='Tab 1']");
-    const tab2Element = document.querySelector("[data-w-tab='Tab 2']");
-    const watchedLink2 = document.querySelector(".watched_link2");
+// Attach click handlers for watched links dynamically
+function attachWatchedLinkClickHandler(chapter) {
+    const watchedLink = document.querySelector(`.watched_link${chapter}`);
+    const targetTab = document.querySelector(`[data-w-tab='Tab ${chapter}']`);
 
-    if (!tab1Element || !tab2Element || !watchedLink2) {
-        console.warn("Required elements for Tab 1, Tab 2, or watched_link2 not found.");
+    if (!watchedLink || !targetTab) {
+        console.warn(`Missing watched_link${chapter} or Tab ${chapter}.`);
         return;
     }
 
-    // Monitor when Tab 1 becomes the active tab
-    const observer = new MutationObserver(() => {
-        if (tab1Element.classList.contains("w--current")) {
-            console.log("Tab 1 is now active. Attaching watched_link2 handler.");
+    // Attach a single click handler
+    watchedLink.removeEventListener("click", handleWatchedLinkClick);
+    watchedLink.addEventListener("click", handleWatchedLinkClick);
 
-            // Ensure only one click handler is attached
-            watchedLink2.removeEventListener("click", handleWatchedLinkClick);
-            watchedLink2.addEventListener("click", handleWatchedLinkClick);
-
-            // Stop observing since the handler is attached
-            observer.disconnect();
-        }
-    });
-
-    // Observe changes to Tab 1's class attribute
-    observer.observe(tab1Element, { attributes: true, attributeFilter: ["class"] });
-
-    // Define the handler for watched_link2 click
     function handleWatchedLinkClick(event) {
-        event.preventDefault(); // Prevent default link behavior
-        tab2Element.click(); // Simulate clicking on Tab 2
-        console.log("Navigated to Tab 2 via watched_link2.");
-    }
-}
-
-// Call the function on document ready
-document.addEventListener("DOMContentLoaded", () => {
-    waitForTab1AndAttachWatchedLink2();
-});
-
-// Check all videos watched
-function checkAllVideosWatched(isGuestVideo) {
-    const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
-    const watchedVideos = Object.keys(videoWatched).filter((id) => videoWatched[id]).length;
-
-    console.log(
-        `Checking all videos watched for ${isGuestVideo ? "guest" : "user"}. Total videos: ${totalVideos.size}, Watched: ${watchedVideos}`
-    );
-
-    if (watchedVideos === totalVideos.size && totalVideos.size > 0) {
-        console.log("All videos watched. Enabling all quiz buttons.");
-        enableAllQuizButtons();
+        event.preventDefault(); // Prevent default behavior
+        targetTab.click(); // Simulate clicking the tab
+        console.log(`Navigated to Tab ${chapter} via watched_link${chapter}.`);
     }
 }
 
@@ -171,22 +135,35 @@ function initializeVimeoPlayers() {
     });
 }
 
-// Monitor DOM changes dynamically to detect login state
-function monitorDomChanges() {
-    const observer = new MutationObserver(() => {
-        const isLoggedIn = detectLoginState();
-        console.log(`Login state detected: ${isLoggedIn ? "Logged In" : "Guest"}`);
-        initializeVimeoPlayers();
-        disableAllQuizButtons(); // Reset buttons on DOM change
-    });
+// Check all videos watched
+function checkAllVideosWatched(isGuestVideo) {
+    const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
+    const watchedVideos = Object.keys(videoWatched).filter((id) => videoWatched[id]).length;
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-    });
+    console.log(
+        `Checking all videos watched for ${isGuestVideo ? "guest" : "user"}. Total videos: ${totalVideos.size}, Watched: ${watchedVideos}`
+    );
+
+    if (watchedVideos === totalVideos.size && totalVideos.size > 0) {
+        console.log("All videos watched. Enabling all quiz buttons.");
+        enableAllQuizButtons();
+    }
 }
 
-// Load Vimeo Player API and initialize
+// DOM Content Loaded handler
+document.addEventListener("DOMContentLoaded", () => {
+    disableAllQuizButtons(); // Disable all quiz buttons initially
+    loadScript("https://player.vimeo.com/api/player.js", () => {
+        initializeVimeoPlayers();
+
+        // Attach handlers for watched links
+        attachWatchedLinkClickHandler(1);
+        attachWatchedLinkClickHandler(2);
+        attachWatchedLinkClickHandler(3);
+    });
+});
+
+// Load Vimeo Player API dynamically
 function loadScript(src, callback) {
     const script = document.createElement("script");
     script.src = src;
