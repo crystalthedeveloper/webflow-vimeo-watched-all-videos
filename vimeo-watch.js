@@ -80,9 +80,9 @@ function attachWatchedLinkHandlers() {
         function handleWatchedLinkClick(event) {
             event.preventDefault();
             console.log(`Click handler fired for ${linkSelector}`);
-            console.dir(targetTab);
+            console.log(`Target tab:`, targetTab);
 
-            // Try triggering the Webflow tab system
+            // Simulate Webflow's click behavior
             try {
                 if (targetTab.click) {
                     console.log(`Simulating click on ${targetTabSelector}...`);
@@ -96,10 +96,23 @@ function attachWatchedLinkHandlers() {
             }
 
             // Fallback: manually toggle active state for Webflow tabs
-            const allTabs = document.querySelectorAll("[data-w-tab]");
-            allTabs.forEach((tab) => tab.classList.remove("w--current")); // Remove current state
-            targetTab.classList.add("w--current"); // Add active state
-            console.log(`Manually set active state for ${targetTabSelector}.`);
+            const tabContainer = targetTab.closest(".w-tabs");
+            if (tabContainer) {
+                console.log(`Manually activating tab ${targetTabSelector}...`);
+                const allTabs = tabContainer.querySelectorAll("[data-w-tab]");
+                const allTabLinks = tabContainer.querySelectorAll(".w-tab-link");
+                allTabs.forEach((tab) => tab.classList.remove("w--tab-active")); // Remove active state
+                allTabLinks.forEach((link) => link.classList.remove("w--current")); // Remove current state
+
+                targetTab.classList.add("w--tab-active"); // Add active state
+                const correspondingTabLink = tabContainer.querySelector(`[data-w-tab-link='${targetTabSelector}']`);
+                if (correspondingTabLink) {
+                    correspondingTabLink.classList.add("w--current"); // Activate tab link
+                    console.log(`Activated tab link for ${targetTabSelector}.`);
+                }
+            } else {
+                console.warn(`Could not find tab container for ${targetTabSelector}.`);
+            }
         }
     });
 }
