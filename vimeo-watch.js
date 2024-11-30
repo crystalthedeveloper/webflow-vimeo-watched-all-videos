@@ -11,7 +11,7 @@ const totalVideos = new Set(); // Store unique video IDs per page
 
 // Detect login state based on the presence of specific elements
 function isGuest() {
-    return !document.querySelector(".user_video-wrap"); // Check if user_video-wrap exists
+    return !document.querySelector(".watched_link1"); // Guests have no links
 }
 
 // Disable the quiz button
@@ -40,26 +40,12 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-// Toggle visibility between user and guest video wrappers
-function toggleVideoVisibility() {
-    const isLoggedIn = !isGuest(); // Determine if user is logged in
-    const userVideoWrap = document.querySelector(".user_video-wrap");
-    const guestVideoWrap = document.querySelector(".guest_video-wrap");
-
-    if (userVideoWrap) {
-        userVideoWrap.style.display = isLoggedIn ? "block" : "none";
-    }
-    if (guestVideoWrap) {
-        guestVideoWrap.style.display = isLoggedIn ? "none" : "block";
-    }
-}
-
 // Unhide completion elements and attach click handlers
 function unhideVideoComplete(videoId, chapter) {
     if (isGuest()) {
-        document.querySelector(`.guest_complete_${chapter}`)?.classList.remove("hidden");
+        $(`.guest_complete_${chapter}`).removeClass("hidden");
     } else {
-        document.querySelector(`.video_complete_${chapter}`)?.classList.remove("hidden");
+        $(`.video_complete_${chapter}`).removeClass("hidden");
 
         // Attach click handlers to watched links
         const watchedLinks = {
@@ -69,13 +55,7 @@ function unhideVideoComplete(videoId, chapter) {
 
         const watchedLink = watchedLinks[chapter];
         if (watchedLink) {
-            const linkElement = document.querySelector(watchedLink.link);
-            if (linkElement) {
-                linkElement.addEventListener("click", () => {
-                    const tabElement = document.querySelector(watchedLink.tab);
-                    if (tabElement) tabElement.click();
-                });
-            }
+            $(watchedLink.link).off("click").on("click", () => $(watchedLink.tab).click());
         }
     }
 
@@ -117,17 +97,4 @@ function loadScript(src, callback) {
 document.addEventListener("DOMContentLoaded", () => {
     disableQuizButton();
     loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
-
-    // Toggle visibility between user and guest video wrappers
-    toggleVideoVisibility();
-});
-
-// Handle user login/logout events
-document.addEventListener("userSignedIn", () => {
-    toggleVideoVisibility(); // Show user_video-wrap and hide guest_video-wrap
-    initializeVimeoPlayers(); // Ensure user videos are properly initialized
-});
-
-document.addEventListener("userSignedOut", () => {
-    toggleVideoVisibility(); // Show guest_video-wrap and hide user_video-wrap
 });
