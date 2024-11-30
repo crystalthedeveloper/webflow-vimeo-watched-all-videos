@@ -37,6 +37,16 @@ function enableQuizButtonForChapter(chapter) {
     }
 }
 
+// Enable all quiz buttons for all chapters
+function enableAllQuizButtons() {
+    document.querySelectorAll(".quiz-button").forEach((button) => {
+        button.classList.remove("disabled");
+        button.style.pointerEvents = "auto";
+        button.style.opacity = "1";
+    });
+    console.log("Enabled all quiz buttons.");
+}
+
 // Mark video as watched
 function markVideoAsWatched(videoId, isGuestVideo) {
     const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
@@ -58,7 +68,7 @@ function markVideoAsWatched(videoId, isGuestVideo) {
     }
 }
 
-// Unhide completion elements dynamically
+// Unhide completion elements dynamically and attach link handlers
 function unhideVideoComplete(videoId, chapter) {
     console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
     const targetClass = `.video_complete_${chapter}`;
@@ -71,11 +81,11 @@ function unhideVideoComplete(videoId, chapter) {
         console.warn(`No completion elements found for Chapter ${chapter}.`);
     }
 
-    // Attach click handler to the watched link
+    // Attach click handler to the watched link for navigation
     attachWatchedLinkClickHandler(chapter);
 }
 
-// Attach click handlers for watched links to navigate to the next tab
+// Attach click handlers for watched links to navigate to their respective tabs
 function attachWatchedLinkClickHandler(chapter) {
     const watchedLinkSelector = `.watched_link${chapter}`;
     const tabSelector = `[data-w-tab='Tab ${chapter + 1}']`; // Navigate to the next tab
@@ -98,7 +108,14 @@ function checkAllVideosWatched(isGuestVideo) {
     const videoWatched = isGuestVideo ? guestVideoWatched : userVideoWatched;
     const watchedVideos = Object.keys(videoWatched).filter((id) => videoWatched[id]).length;
 
-    console.log(`Checking all videos watched for ${isGuestVideo ? "guest" : "user"}. Total videos: ${totalVideos.size}, Watched: ${watchedVideos}`);
+    console.log(
+        `Checking all videos watched for ${isGuestVideo ? "guest" : "user"}. Total videos: ${totalVideos.size}, Watched: ${watchedVideos}`
+    );
+
+    if (watchedVideos === totalVideos.size && totalVideos.size > 0) {
+        console.log("All videos watched. Enabling all quiz buttons.");
+        enableAllQuizButtons();
+    }
 }
 
 // Initialize Vimeo players dynamically
@@ -109,7 +126,9 @@ function initializeVimeoPlayers() {
         const chapter = parseInt(iframe.closest("[id^='Chapter']").id.replace("Chapter ", ""), 10);
         const isGuestVideo = iframe.closest(".guestvideo") !== null;
 
-        console.log(`Initializing Vimeo player for video ID: ${videoId}, Chapter: ${chapter}, isGuestVideo: ${isGuestVideo}`);
+        console.log(
+            `Initializing Vimeo player for video ID: ${videoId}, Chapter: ${chapter}, isGuestVideo: ${isGuestVideo}`
+        );
         if (!totalVideos.has(videoId)) totalVideos.add(videoId);
 
         const player = new Vimeo.Player(iframe);
