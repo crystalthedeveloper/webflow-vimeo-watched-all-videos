@@ -98,21 +98,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // Disable the quiz button initially
     disableQuizButton();
 
-    // Check user login status based on a specific Webflow class or element
-    const isLoggedIn = document.body.classList.contains("logged-in"); // Adjust this class name as per your Webflow setup
+    // Detect login state based on a class or element (adjust as per your Webflow setup)
+    const isLoggedIn = document.body.classList.contains("logged-in"); // Ensure this class is added dynamically in Webflow for logged-in users
 
     // Handle visibility of video embeds based on login state
     document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
         if (isLoggedIn && iframe.classList.contains("guest-video")) {
-            // Hide guest video for logged-in users
+            // Hide guest videos for logged-in users
             iframe.style.display = "none";
         } else if (!isLoggedIn && iframe.classList.contains("user-video")) {
-            // Hide user video for guest users
+            // Hide user videos for guest users
             iframe.style.display = "none";
         } else {
             // Show the appropriate video
             iframe.style.display = "block";
         }
+    });
+
+    // Check if the correct video is being displayed (for debugging)
+    document.querySelectorAll("iframe").forEach((iframe) => {
+        console.log(`Video ID: ${iframe.getAttribute("data-vimeo-id")}, Display: ${iframe.style.display}`);
     });
 
     // Dynamically load the Vimeo API script and initialize players
