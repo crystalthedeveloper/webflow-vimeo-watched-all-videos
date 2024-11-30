@@ -48,17 +48,37 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
-function attachTabClickHandlers(chapter) {
-    const tabSelector = `[data-w-tab='Tab ${chapter}']`;
-    const watchedLinkSelector = `.watched_link${chapter}`;
-
-    if ($(watchedLinkSelector).length && $(tabSelector).length) {
-        $(watchedLinkSelector).off("click").on("click", () => {
-            $(tabSelector).click();
-            console.log(`Tab ${chapter} clicked via .watched_link${chapter}`);
-        });
-    } else {
-        console.log(`No tab or watched link found for Chapter ${chapter}.`);
+function unhideVideoComplete(videoId, isGuestVideo) {
+    let iframe = $(`iframe[src*='${videoId}']`);
+    if (iframe.length > 0) {
+        let chapter = iframe.attr('id');
+        if (isGuestVideo) {
+            switch (chapter) {
+                case 'Chapter 1':
+                    $('.guest_complete_1').removeClass('hidden');
+                    break;
+                case 'Chapter 2':
+                    $('.guest_complete_2').removeClass('hidden');
+                    break;
+                case 'Chapter 3':
+                    $('.guest_complete_3').removeClass('hidden');
+                    break;
+            }
+        } else {
+            switch (chapter) {
+                case 'Chapter 1':
+                    $('.video_complete_1').removeClass('hidden');
+                    $('.watched_link1').click(() => $('[data-w-tab="Tab 1"]').click());
+                    break;
+                case 'Chapter 2':
+                    $('.video_complete_2').removeClass('hidden');
+                    $('.watched_link2').click(() => $('[data-w-tab="Tab 2"]').click());
+                    break;
+                case 'Chapter 3':
+                    $('.video_complete_3').removeClass('hidden');
+                    break;
+            }
+        }
     }
 }
 
