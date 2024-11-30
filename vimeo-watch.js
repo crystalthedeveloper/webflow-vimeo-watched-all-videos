@@ -82,16 +82,24 @@ function attachWatchedLinkHandlers() {
             console.log(`Click handler fired for ${linkSelector}`);
             console.dir(targetTab);
 
-            if (targetTab.click) {
-                targetTab.click();
-                console.log(`Simulated click on ${targetTabSelector}.`);
-            } else {
-                console.warn(`Click method not available on ${targetTabSelector}.`);
-                const allTabs = document.querySelectorAll("[data-w-tab]");
-                allTabs.forEach((tab) => tab.classList.remove('w--current')); // Remove current
-                targetTab.classList.add('w--current'); // Add active state
-                console.log(`Manually set active state for ${targetTabSelector}.`);
+            // Try triggering the Webflow tab system
+            try {
+                if (targetTab.click) {
+                    console.log(`Simulating click on ${targetTabSelector}...`);
+                    targetTab.click(); // Simulate click
+                    console.log(`Simulated click on ${targetTabSelector}.`);
+                } else {
+                    console.warn(`Click method not available on ${targetTabSelector}.`);
+                }
+            } catch (error) {
+                console.error(`Error clicking ${targetTabSelector}:`, error);
             }
+
+            // Fallback: manually toggle active state for Webflow tabs
+            const allTabs = document.querySelectorAll("[data-w-tab]");
+            allTabs.forEach((tab) => tab.classList.remove("w--current")); // Remove current state
+            targetTab.classList.add("w--current"); // Add active state
+            console.log(`Manually set active state for ${targetTabSelector}.`);
         }
     });
 }
