@@ -106,11 +106,21 @@ function initializeVimeoPlayers() {
     });
 }
 
+// Load the Vimeo Player API dynamically
+function loadVimeoAPI(callback) {
+    const script = document.createElement("script");
+    script.src = "https://player.vimeo.com/api/player.js";
+    script.defer = true;
+    script.onload = callback;
+    document.head.appendChild(script);
+    console.log("Vimeo Player API loaded.");
+}
+
 // Periodic login state check
 setInterval(checkLoginStateAndRefresh, 2000);
 
 // On document ready
 document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem(`currentUserState_${pageKey}`, JSON.stringify(isUserLoggedIn()));
-    initializeVimeoPlayers();
+    loadVimeoAPI(initializeVimeoPlayers);
 });
