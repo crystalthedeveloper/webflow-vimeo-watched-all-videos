@@ -40,6 +40,20 @@ function enableQuizButtonIfAllWatched() {
     }
 }
 
+// Show user videos and hide guest videos
+function toggleVideoVisibility(isLoggedIn) {
+    const guestVideos = document.querySelectorAll(".guest_video");
+    const userVideos = document.querySelectorAll(".user_video");
+
+    if (isLoggedIn) {
+        guestVideos.forEach((video) => video.classList.add("hidden"));
+        userVideos.forEach((video) => video.classList.remove("hidden"));
+    } else {
+        guestVideos.forEach((video) => video.classList.remove("hidden"));
+        userVideos.forEach((video) => video.classList.add("hidden"));
+    }
+}
+
 // Unhide completion elements and attach click handlers
 function unhideVideoComplete(videoId, chapter) {
     if (isGuest()) {
@@ -84,21 +98,6 @@ function initializeVimeoPlayers() {
     });
 }
 
-// Refresh user video embeds
-function refreshUserVideoEmbed() {
-    document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
-        const videoId = iframe.getAttribute("data-vimeo-id");
-
-        // Reset the iframe by replacing it with a clone
-        const parent = iframe.parentElement;
-        const clone = iframe.cloneNode(true);
-        parent.replaceChild(clone, iframe);
-    });
-
-    // Reload Vimeo API and reinitialize players
-    loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
-}
-
 // Load external scripts dynamically
 function loadScript(src, callback) {
     const script = document.createElement("script");
@@ -113,12 +112,19 @@ document.addEventListener("DOMContentLoaded", () => {
     disableQuizButton();
     loadScript("https://player.vimeo.com/api/player.js", initializeVimeoPlayers);
 
-    // Simulate user login event for testing
-    document.addEventListener("userSignedIn", refreshUserVideoEmbed);
+    // Toggle video visibility on user login state
+    const isLoggedIn = !isGuest();
+    toggleVideoVisibility(isLoggedIn);
+
+    // Simulate user login event for testing (remove in production)
+    setTimeout(() => {
+        const event = new Event("userSignedIn");
+        document.dispatchEvent(event);
+    }, 5000);
 });
 
-// Simulate a user login event (remove in production)
-setTimeout(() => {
-    const event = new Event("userSignedIn");
-    document.dispatchEvent(event);
-}, 5000); // Simulates login after 5 seconds
+// Handle user login to show/hide videos
+document.addEventListener("userSignedIn", () => {
+    toggleVideoVisibility(true);
+    initializeVimeoPlayers(); // Ensure user videos are properly initialized
+});
