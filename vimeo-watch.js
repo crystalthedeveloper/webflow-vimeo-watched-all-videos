@@ -58,24 +58,27 @@ function attachWatchedLinkHandlers() {
         ".watched_link2": "[data-w-tab='Tab 2']", // .watched_link2 navigates to Tab 2
     };
 
+    console.log("Attaching watched link handlers...");
     Object.keys(linksToTabs).forEach((linkSelector) => {
         const targetTabSelector = linksToTabs[linkSelector];
         const watchedLink = document.querySelector(linkSelector);
         const targetTab = document.querySelector(targetTabSelector);
 
+        console.log(`Checking for ${linkSelector} and ${targetTabSelector}...`);
         if (!watchedLink || !targetTab) {
             console.warn(`Missing ${linkSelector} or ${targetTabSelector}.`);
             return;
         }
 
+        console.log(`Attaching click handler to ${linkSelector} for ${targetTabSelector}.`);
         // Remove existing click handler to avoid duplication
         watchedLink.removeEventListener("click", handleWatchedLinkClick);
         watchedLink.addEventListener("click", handleWatchedLinkClick);
 
         function handleWatchedLinkClick(event) {
             event.preventDefault(); // Prevent default behavior
+            console.log(`Navigating to ${targetTabSelector} via ${linkSelector}...`);
             targetTab.click(); // Simulate clicking the tab
-            console.log(`Navigated to ${targetTabSelector} via ${linkSelector}.`);
         }
     });
 }
@@ -105,6 +108,7 @@ function unhideVideoComplete(videoId, chapter) {
             console.log(`Unhid logged-in user completion elements for Chapter ${chapter}.`);
 
             // Attach watched link handler dynamically
+            console.log("Re-attaching watched link handlers after unhide...");
             attachWatchedLinkHandlers();
         } else {
             console.warn(`No logged-in user completion elements found for Chapter ${chapter}.`);
