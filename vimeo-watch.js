@@ -19,6 +19,7 @@ function disableAllQuizButtons() {
     document.querySelectorAll(".quiz-button").forEach((button) => {
         button.classList.add("disabled");
         button.style.pointerEvents = "none";
+        button.style.opacity = "0.5";
         console.log("Disabled all quiz buttons.");
     });
 }
@@ -93,10 +94,10 @@ function attachWatchedLinkClickHandler(chapter) {
     const tab = document.querySelector(tabSelector);
 
     if (watchedLink && tab) {
-        // Remove existing click event to prevent duplication
-        watchedLink.removeEventListener("click", () => {});
-        
-        // Add new click event
+        // Remove any previously attached click event listeners to avoid duplication
+        watchedLink.removeEventListener("click", handleWatchedLinkClick);
+
+        // Add a new click event listener
         watchedLink.addEventListener("click", () => {
             tab.click();
             console.log(`Navigated to Tab ${chapter} via ${watchedLinkSelector}.`);
