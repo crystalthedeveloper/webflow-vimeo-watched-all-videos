@@ -19,7 +19,6 @@ function disableAllQuizButtons() {
     document.querySelectorAll(".quiz-button").forEach((button) => {
         button.classList.add("disabled");
         button.style.pointerEvents = "none";
-        button.style.opacity = "0.5";
         console.log("Disabled all quiz buttons.");
     });
 }
@@ -69,16 +68,16 @@ function markVideoAsWatched(videoId, isGuestVideo) {
 }
 
 // Unhide completion elements dynamically and attach link handlers
-function unhideVideoComplete(videoId, chapter) {
+function unhideVideoComplete(videoId, chapter, isGuestVideo) {
     console.log(`Attempting to unhide completion elements for video ID: ${videoId}, Chapter: ${chapter}`);
-    const targetClass = `.video_complete_${chapter}`;
+    const targetClass = isGuestVideo ? `.guest_complete_${chapter}` : `.video_complete_${chapter}`;
     const targetElements = document.querySelectorAll(targetClass);
 
     if (targetElements.length > 0) {
         targetElements.forEach((element) => element.classList.remove("hidden"));
-        console.log(`Unhid completion elements for Chapter ${chapter}.`);
+        console.log(`Unhid completion elements for Chapter ${chapter} (${isGuestVideo ? "Guest" : "User"}).`);
     } else {
-        console.warn(`No completion elements found for Chapter ${chapter}.`);
+        console.warn(`No completion elements found for Chapter ${chapter} (${isGuestVideo ? "Guest" : "User"}).`);
     }
 
     // Attach click handler to the watched link for navigation
@@ -88,18 +87,18 @@ function unhideVideoComplete(videoId, chapter) {
 // Attach click handlers for watched links to navigate to their respective tabs
 function attachWatchedLinkClickHandler(chapter) {
     const watchedLinkSelector = `.watched_link${chapter}`;
-    const tabSelector = `[data-w-tab='Tab ${chapter + 1}']`; // Navigate to the next tab
+    const tabSelector = `[data-w-tab='Tab ${chapter}']`;
 
     const watchedLink = document.querySelector(watchedLinkSelector);
-    const nextTab = document.querySelector(tabSelector);
+    const tab = document.querySelector(tabSelector);
 
-    if (watchedLink && nextTab) {
+    if (watchedLink && tab) {
         watchedLink.addEventListener("click", () => {
-            nextTab.click();
-            console.log(`Navigated to Tab ${chapter + 1} via .watched_link${chapter}.`);
+            tab.click();
+            console.log(`Navigated to Tab ${chapter} via ${watchedLinkSelector}.`);
         });
     } else {
-        console.warn(`Watched link or next tab not found for Chapter ${chapter}.`);
+        console.warn(`Watched link or tab not found for Chapter ${chapter}.`);
     }
 }
 
@@ -136,7 +135,7 @@ function initializeVimeoPlayers() {
         player.on("ended", () => {
             console.log(`Video ${videoId} ended.`);
             markVideoAsWatched(videoId, isGuestVideo);
-            unhideVideoComplete(videoId, chapter);
+            unhideVideoComplete(videoId, chapter, isGuestVideo);
             enableQuizButtonForChapter(chapter);
         });
 
