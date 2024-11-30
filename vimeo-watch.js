@@ -10,23 +10,22 @@ let totalVideos = new Set(); // Set to store unique video IDs per page
 
 // Function to check if the user is logged in
 function isUserLoggedIn() {
-    return document.body.hasAttribute("data-wf-user"); // Adjust as per Webflow's implementation
+    return document.body.hasAttribute("data-wf-user"); // Adjust this if login detection differs
 }
 
-// Function to dynamically detect login state changes
-function checkLoginStateAndRefresh() {
-    const currentUserState = isUserLoggedIn();
-    const previousUserState = JSON.parse(localStorage.getItem(`currentUserState_${pageKey}`)) || false;
+// Function to refresh login state dynamically
+function refreshLoginState() {
+    const isLoggedIn = isUserLoggedIn();
+    const previousState = JSON.parse(localStorage.getItem(`currentUserState_${pageKey}`)) || false;
 
-    if (currentUserState !== previousUserState) {
-        console.log("Login state changed. Refreshing...");
-        localStorage.setItem(`currentUserState_${pageKey}`, JSON.stringify(currentUserState));
+    if (isLoggedIn !== previousState) {
+        console.log("Login state changed. Reinitializing players...");
+        localStorage.setItem(`currentUserState_${pageKey}`, JSON.stringify(isLoggedIn));
 
-        // Reset video watched data and reinitialize players
+        // Reset player state and reinitialize
         guestVideoWatched = {};
         userVideoWatched = {};
-        totalVideos = new Set();
-        initializeVimeoPlayers(); // Reinitialize Vimeo players with updated state
+        initializeVimeoPlayers();
     }
 }
 
@@ -117,7 +116,7 @@ function loadVimeoAPI(callback) {
 }
 
 // Periodic login state check
-setInterval(checkLoginStateAndRefresh, 2000);
+setInterval(refreshLoginState, 3000); // Check login state every 3 seconds
 
 // On document ready
 document.addEventListener("DOMContentLoaded", () => {
