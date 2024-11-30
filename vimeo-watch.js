@@ -82,43 +82,44 @@ function attachWatchedLinkHandlers() {
             console.log(`Click handler fired for ${linkSelector}`);
             console.log(`Target tab:`, targetTab);
 
+            // Activate the tab programmatically
             try {
-                // Simulate Webflow's native click behavior
                 console.log(`Simulating click on ${targetTabSelector}...`);
                 targetTab.click();
                 console.log(`Simulated click on ${targetTabSelector}.`);
             } catch (error) {
-                console.error(`Error clicking ${targetTabSelector}:`, error);
-            }
+                console.warn(`Error clicking ${targetTabSelector}:`, error);
 
-            // Fallback: manually toggle the active state
-            const tabContainer = targetTab.closest(".w-tabs");
-            if (tabContainer) {
-                console.log(`Manually activating tab ${targetTabSelector}...`);
-                const allTabs = tabContainer.querySelectorAll("[data-w-tab]");
-                const allTabLinks = tabContainer.querySelectorAll(".w-tab-link");
+                // Fallback: manually toggle the active state
+                const tabContainer = targetTab.closest(".w-tabs");
+                if (tabContainer) {
+                    console.log(`Manually activating tab ${targetTabSelector}...`);
 
-                // Remove active state from all tabs and links
-                allTabs.forEach((tab) => tab.classList.remove("w--tab-active"));
-                allTabLinks.forEach((link) => link.classList.remove("w--current"));
+                    const allTabs = tabContainer.querySelectorAll("[data-w-tab]");
+                    const allTabLinks = tabContainer.querySelectorAll(".w-tab-link");
 
-                // Add active state to the target tab and its corresponding link
-                targetTab.classList.add("w--tab-active");
-                const correspondingTabLink = tabContainer.querySelector(
-                    `.w-tab-link[data-w-tab='${targetTab.getAttribute("data-w-tab")}']`
-                );
-                if (correspondingTabLink) {
-                    correspondingTabLink.classList.add("w--current");
-                    console.log(`Activated tab link for ${targetTabSelector}.`);
+                    // Remove active state from all tabs and links
+                    allTabs.forEach((tab) => tab.classList.remove("w--tab-active"));
+                    allTabLinks.forEach((link) => link.classList.remove("w--current"));
+
+                    // Add active state to the target tab and its corresponding link
+                    targetTab.classList.add("w--tab-active");
+                    const correspondingTabLink = tabContainer.querySelector(
+                        `.w-tab-link[data-w-tab='${targetTab.getAttribute("data-w-tab")}']`
+                    );
+                    if (correspondingTabLink) {
+                        correspondingTabLink.classList.add("w--current");
+                        console.log(`Activated tab link for ${targetTabSelector}.`);
+                    } else {
+                        console.warn(`Could not find corresponding tab link for ${targetTabSelector}.`);
+                    }
+
+                    // Manually set aria-selected attributes for accessibility
+                    allTabs.forEach((tab) => tab.setAttribute("aria-selected", "false"));
+                    targetTab.setAttribute("aria-selected", "true");
                 } else {
-                    console.warn(`Could not find corresponding tab link for ${targetTabSelector}.`);
+                    console.warn(`Could not find tab container for ${targetTabSelector}.`);
                 }
-
-                // Manually set aria-selected attributes for accessibility
-                allTabs.forEach((tab) => tab.setAttribute("aria-selected", "false"));
-                targetTab.setAttribute("aria-selected", "true");
-            } else {
-                console.warn(`Could not find tab container for ${targetTabSelector}.`);
             }
         }
     });
