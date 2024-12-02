@@ -70,7 +70,11 @@ function initializeVimeoPlayers() {
 
         if (!totalVideos.has(videoId)) totalVideos.add(videoId);
 
-        const player = new Vimeo.Player(iframe);
+        const player = new Vimeo.Player(iframe, {
+            id: videoId,
+            controls: false, 
+            background: true
+        });
 
         player.on("ended", () => {
             const storageKey = isGuest() ? "guestVideoWatched" : "userVideoWatched";
