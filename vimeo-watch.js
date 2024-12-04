@@ -26,9 +26,10 @@ function disableQuizButton() {
 
 // Enable the quiz button if all videos are watched
 function enableQuizButtonIfAllWatched() {
-    const watchedCount = isGuest()
-        ? Object.keys(guestVideoWatched).filter((id) => guestVideoWatched[id]).length
-        : Object.keys(userVideoWatched).filter((id) => userVideoWatched[id]).length;
+    const videoWatched = isGuest() ? guestVideoWatched : userVideoWatched;
+    const watchedCount = Object.keys(videoWatched).filter((id) => videoWatched[id]).length;
+
+    console.log(`Watched Videos: ${watchedCount}/${totalVideos.size}`);
 
     if (watchedCount === totalVideos.size && totalVideos.size > 0) {
         const button = document.querySelector(".quiz-button");
@@ -66,7 +67,13 @@ function unhideVideoComplete(videoId, chapter) {
 function initializeVimeoPlayers() {
     document.querySelectorAll("iframe[data-vimeo-id]").forEach((iframe) => {
         const videoId = iframe.getAttribute("data-vimeo-id");
-        const chapter = parseInt(iframe.closest("[id^='Chapter']").id.replace("Chapter ", ""), 10);
+        const chapterElement = iframe.closest("[id^='Chapter']");
+        const chapter = chapterElement ? parseInt(chapterElement.id.replace("Chapter ", ""), 10) : null;
+
+        if (!videoId || !chapter) {
+            console.warn("Missing video ID or chapter data:", iframe);
+            return;
+        }
 
         if (!totalVideos.has(videoId)) totalVideos.add(videoId);
 
